@@ -14,7 +14,7 @@ if (!API_KEY) {
 }
 
 const ai = API_KEY ? new GoogleGenAI({ apiKey: API_KEY }) : null;
-const TEXT_MODEL_NAME = "gemini-2.5-flash-preview-04-17";
+const TEXT_MODEL_NAME = "gemini-1.5-flash-latest"; // Use -latest suffix for stable access
 // const IMAGE_MODEL_NAME = "imagen-3.0-generate-002"; // If image generation is needed
 
 const parseJsonResponse = <T,>(responseText: string): T | null => {
@@ -97,14 +97,23 @@ export const geminiService = {
     `;
 
     try {
+      console.log('[Gemini] Enhancing listing content...');
       const response: GenerateContentResponse = await ai.models.generateContent({
         model: TEXT_MODEL_NAME,
-        contents: prompt,
-        config: { responseMimeType: "application/json" }
+        contents: [{ role: 'user', parts: [{ text: prompt }] }]
       });
-      return parseJsonResponse<AiEnhancedContent>(response.text || '');
+      console.log('[Gemini] Response received:', response.text?.substring(0, 100));
+      
+      // Parse the JSON response
+      const result = parseJsonResponse<AiEnhancedContent>(response.text || '');
+      return result;
     } catch (error) {
-      console.error("Error enhancing listing content with Gemini:", error);
+      console.error("[Gemini] Error enhancing listing content:", error);
+      // Log more details about the error
+      if (error instanceof Error) {
+        console.error("[Gemini] Error message:", error.message);
+        console.error("[Gemini] Error stack:", error.stack);
+      }
       return null;
     }
   },

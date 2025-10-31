@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const APP_NAME = "Kejalink";
+export const APP_NAME = "KejaLink";
 
 export const NavigationLinks = [
   { name: "Home", path: "/" },

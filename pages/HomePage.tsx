@@ -122,12 +122,12 @@ const HomePage: React.FC = () => {
 
       {/* Call to Action for Agents */}
       <section className="bg-green-600 text-white py-12 px-6 rounded-lg shadow-xl text-center">
-        <h2 className="text-3xl font-semibold mb-4">Are you an Agent or Landlord?</h2>
+        <h2 className="text-3xl font-semibold mb-4">Are you a Property Manager or Landlord?</h2>
         <p className="text-lg mb-6 max-w-xl mx-auto">
           Reach thousands of genuine tenants. Post your listings on a trusted platform with AI-powered verification and tools to help you succeed.
         </p>
         <Button variant="outline" size="lg" className="bg-white text-green-600 border-white hover:bg-gray-100" onClick={() => navigate('/auth?mode=register&role=agent')}>
-          Register as an Agent
+          Register as a Property Manager
         </Button>
       </section>
     </div>
