@@ -21,9 +21,12 @@ if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
 
 $file = $_FILES['image'];
 
-// Validate file size
+// Validate file size (5MB = 5,242,880 bytes)
+$maxSizeMB = MAX_FILE_SIZE / 1024 / 1024;
+$fileSizeMB = round($file['size'] / 1024 / 1024, 2);
+
 if ($file['size'] > MAX_FILE_SIZE) {
-    errorResponse('File too large. Maximum size is ' . (MAX_FILE_SIZE / 1024 / 1024) . 'MB');
+    errorResponse("File too large. Your file is {$fileSizeMB}MB, but the maximum allowed size is {$maxSizeMB}MB. Please compress or resize your image.", 413);
 }
 
 // Validate file extension
@@ -56,15 +59,36 @@ try {
     // Generate public URL
     $publicUrl = UPLOAD_URL . $uniqueFilename;
     
-    // Optionally: Save to database if you want to track uploads
-    // $db = Database::getInstance()->getConnection();
-    // $stmt = $db->prepare("INSERT INTO uploads (user_id, filename, url) VALUES (?, ?, ?)");
-    // $stmt->execute([$currentUser['id'], $uniqueFilename, $publicUrl]);
+    // If listing_id is provided, save to property_images table
+    $imageId = null;
+    if (isset($_POST['listing_id']) && !empty($_POST['listing_id'])) {
+        $listingId = $_POST['listing_id'];
+        
+        // Verify listing exists and user owns it
+        $db = Database::getInstance()->getConnection();
+        $stmt = $db->prepare("SELECT agent_id FROM property_listings WHERE id = ?");
+        $stmt->execute([$listingId]);
+        $listing = $stmt->fetch();
+        
+        if ($listing && ($listing['agent_id'] === $currentUser['id'] || $currentUser['role'] === 'admin')) {
+            // Get current max display_order for this listing
+            $stmt = $db->prepare("SELECT COALESCE(MAX(display_order), -1) + 1 as next_order FROM property_images WHERE listing_id = ?");
+            $stmt->execute([$listingId]);
+            $orderResult = $stmt->fetch();
+            $displayOrder = $orderResult['next_order'];
+            
+            // Insert image record
+            $imageId = generateUUID();
+            $stmt = $db->prepare("INSERT INTO property_images (id, listing_id, url, display_order) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$imageId, $listingId, $publicUrl, $displayOrder]);
+        }
+    }
     
     jsonResponse([
         'message' => 'File uploaded successfully',
         'url' => $publicUrl,
-        'filename' => $uniqueFilename
+        'filename' => $uniqueFilename,
+        'id' => $imageId
     ], 201);
     
 } catch (Exception $e) {

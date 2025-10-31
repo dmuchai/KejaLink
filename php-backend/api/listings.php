@@ -133,8 +133,8 @@ function getListings() {
         foreach ($listings as &$listing) {
             $listing['location'] = json_decode($listing['location'] ?? '{}', true);
             $listing['amenities'] = json_decode($listing['amenities'] ?? '[]', true) ?? [];
-            $listing['images'] = json_decode($listing['images'], true) ?? [];
-            $listing['ai_scan'] = $listing['ai_scan'] ? json_decode($listing['ai_scan'], true) : null;
+            $listing['images'] = json_decode($listing['images'] ?? '[]', true) ?? [];
+            $listing['ai_scan'] = isset($listing['ai_scan']) && $listing['ai_scan'] ? json_decode($listing['ai_scan'], true) : null;
             
             // Group agent data
             $listing['agent'] = [

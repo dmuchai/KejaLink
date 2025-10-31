@@ -19,6 +19,11 @@ dist-ssr
 .env.test.local
 .env.production.local
 
+# PHP Backend - Sensitive Configuration
+php-backend/config.php
+php-backend/uploads/
+*.zip
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

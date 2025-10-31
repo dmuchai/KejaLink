@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Image Upload - Kejalink</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, button { padding: 10px; font-size: 14px; }
+        button { background: #10b981; color: white; border: none; cursor: pointer; border-radius: 5px; }
+        button:hover { background: #059669; }
+        .result { margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 5px; }
+        .error { background: #fee2e2; color: #991b1b; }
+        .success { background: #d1fae5; color: #065f46; }
+    </style>
+</head>
+<body>
+    <h1>🖼️ Test Image Upload</h1>
+    
+    <div class="form-group">
+        <label>1. First, Login to get your token:</label>
+        <input type="email" id="email" placeholder="your-email@example.com" style="width: 100%; margin-bottom: 10px;">
+        <input type="password" id="password" placeholder="password" style="width: 100%; margin-bottom: 10px;">
+        <button onclick="login()">Login</button>
+    </div>
+
+    <div class="form-group">
+        <label>2. Select an image to upload:</label>
+        <input type="file" id="imageFile" accept="image/*" style="width: 100%; margin-bottom: 10px;">
+        <button onclick="uploadImage()">Upload Image</button>
+    </div>
+
+    <div id="result"></div>
+
+    <script>
+        let authToken = '';
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('https://kejalink.co.ke/api/api/auth.php?action=login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                
+                if (data.token) {
+                    authToken = data.token;
+                    showResult('✅ Login successful! Token: ' + authToken.substring(0, 20) + '...', 'success');
+                } else {
+                    showResult('❌ Login failed: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function uploadImage() {
+            if (!authToken) {
+                showResult('❌ Please login first!', 'error');
+                return;
+            }
+
+            const fileInput = document.getElementById('imageFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showResult('❌ Please select an image!', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch('https://kejalink.co.ke/api/api/upload.php', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + authToken
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.url) {
+                    showResult('✅ Upload successful!<br><br><strong>Image URL:</strong><br>' + data.url + '<br><br><img src="' + data.url + '" style="max-width: 100%; margin-top: 10px;">', 'success');
+                    console.log('Full response:', data);
+                } else {
+                    showResult('❌ Upload failed: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'result ' + type;
+            resultDiv.innerHTML = message;
+        }
+    </script>
+</body>
+</html>

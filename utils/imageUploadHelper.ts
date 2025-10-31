@@ -42,9 +42,11 @@ export function validateImageFile(file: File): { valid: boolean; error?: string 
 
   // Check file size
   if (file.size > MAX_FILE_SIZE) {
+    const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+    const maxSizeMB = (MAX_FILE_SIZE / 1024 / 1024).toFixed(0);
     return {
       valid: false,
-      error: `File size exceeds maximum allowed size of ${MAX_FILE_SIZE / 1024 / 1024}MB`,
+      error: `File "${file.name}" is too large (${fileSizeMB}MB). Maximum allowed size is ${maxSizeMB}MB. Please compress or resize your image.`,
     };
   }
 
@@ -115,8 +117,7 @@ export async function uploadImages(files: File[]): Promise<string[]> {
 
 /**
  * Uploads images to storage and saves metadata to property_images table
- * Note: With the new API, images are uploaded and associated with listings
- * via separate API calls. This function maintains backward compatibility.
+ * Images are automatically linked to the listing via the backend API
  * 
  * @param {string} listingId - The ID of the listing to associate images with
  * @param {File[]} files - Array of image files to upload
@@ -126,14 +127,35 @@ export async function uploadImagesToStorageAndSaveMetadata(
   listingId: string,
   files: File[]
 ): Promise<string[]> {
-  // Upload images
-  const urls = await uploadImages(files);
-  
-  // Note: In the new API architecture, images are associated with listings
-  // through the listings API. The frontend should call the listings update
-  // endpoint with the image URLs after this function returns.
-  
-  return urls;
+  const uploadedUrls: string[] = [];
+  const errors: string[] = [];
+
+  for (const file of files) {
+    // Validate file
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      console.error(`File ${file.name} validation failed:`, validation.error);
+      errors.push(`${file.name}: ${validation.error}`);
+      continue;
+    }
+
+    try {
+      // Upload to server WITH listing_id so backend can create the property_images record
+      const response = await uploadAPI.uploadImage(file, listingId);
+      uploadedUrls.push(response.url);
+      console.log(`Successfully uploaded ${file.name} to ${response.url} and linked to listing ${listingId}`);
+    } catch (error: any) {
+      console.error(`Failed to upload ${file.name}:`, error);
+      errors.push(`${file.name}: ${error.message || 'Upload failed'}`);
+    }
+  }
+
+  // If some uploads failed, log the errors
+  if (errors.length > 0) {
+    console.warn('Some file uploads failed:', errors);
+  }
+
+  return uploadedUrls;
 }
 
 /**

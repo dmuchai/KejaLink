@@ -220,9 +220,14 @@ export const listingsAPI = {
 // ============================================
 
 export const uploadAPI = {
-  uploadImage: async (file: File): Promise<{ url: string; filename: string }> => {
+  uploadImage: async (file: File, listingId?: string): Promise<{ url: string; filename: string; id?: string }> => {
     const formData = new FormData();
     formData.append('image', file);
+    
+    // If listing_id is provided, include it so the backend can link the image
+    if (listingId) {
+      formData.append('listing_id', listingId);
+    }
 
     const token = getAuthToken();
     const headers: HeadersInit = {};
