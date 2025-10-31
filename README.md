@@ -1,4 +1,4 @@
-# 🏠 Rentify Kenya
+# 🏠 Kejalink
 
 A modern full-stack real estate web app tailored for the Kenyan market — allowing tenants to browse listings and verified agents to manage property ads securely and efficiently.
 
@@ -80,8 +80,8 @@ npm run test:coverage
 ### 1. Clone the Repo
 
 ```bash
-git clone https://github.com/dmuchai/rentify-houses-kenya.git
-cd rentify-houses-kenya
+git clone https://github.com/dmuchai/kejalink.git
+cd kejalink
 
 2. Install dependencies
 Make sure you have Node.js ≥ v16 and npm installed:

@@ -1,6 +1,6 @@
-# Google Maps API Integration
+# Google Maps Setup Guide
 
-This document outlines how to set up and configure Google Maps API for the Rentify Houses Kenya application.
+This document outlines how to set up and configure Google Maps API for the Kejalink application.
 
 ## Prerequisites
 

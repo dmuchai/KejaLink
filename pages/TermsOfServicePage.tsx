@@ -181,7 +181,7 @@ const TermsOfServicePage: React.FC = () => {
                 For questions about these Terms of Service, please contact us:
               </p>
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-700"><strong>Email:</strong> legal@rentifykenya.com</p>
+                <p className="text-gray-700"><strong>Email:</strong> legal@kejalink.co.ke</p>
                 <p className="text-gray-700"><strong>Phone:</strong> +254 700 123 456</p>
                 <p className="text-gray-700"><strong>Address:</strong> Nairobi, Kenya</p>
               </div>

@@ -128,7 +128,7 @@ const PrivacyPolicyPage: React.FC = () => {
                 If you have questions about this Privacy Policy or our privacy practices, please contact us:
               </p>
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-700"><strong>Email:</strong> privacy@rentifykenya.com</p>
+                <p className="text-gray-700"><strong>Email:</strong> privacy@kejalink.co.ke</p>
                 <p className="text-gray-700"><strong>Phone:</strong> +254 700 123 456</p>
                 <p className="text-gray-700"><strong>Address:</strong> Nairobi, Kenya</p>
               </div>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { PropertyListing, User, AgentMetrics, UserRole, PropertyImage } from '../types';
 import { listingService } from '../services/listingService';
 import { useAuth } from '../hooks/useAuth';
-import { uploadImagesToStorageAndSaveMetadata, deleteImagesFromStorageAndDatabase } from '../utils/imageUploadHelper';
+import { uploadImagesToStorageAndSaveMetadata } from '../utils/imageUploadHelper';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -28,10 +28,11 @@ const AgentDashboardPage: React.FC = () => {
     if (!user || user.role !== UserRole.AGENT) return;
     setIsLoading(true);
     try {
-      const [agentListings, agentMetrics] = await Promise.all([
-        listingService.getListings({ agentId: user.id }),
-        listingService.getAgentMetrics(user.id),
-      ]);
+      // Fetch all listings and filter by agent
+      const allListings = await listingService.getListings();
+      const agentListings = allListings.filter(listing => listing.agent.id === user.id);
+      const agentMetrics = await listingService.getAgentMetrics(user.id);
+      
       setListings(agentListings);
       setMetrics(agentMetrics);
     } catch (err: any) {
@@ -80,21 +81,11 @@ const AgentDashboardPage: React.FC = () => {
       if (editingListing) {
         savedListing = await listingService.updateListing(editingListing.id, formData);
         
-        // Handle image removal for existing listings
+                // Handle image removal for existing listings
         if (imagesToRemove && imagesToRemove.length > 0) {
-          console.log(`[Form Submit] Attempting to delete ${imagesToRemove.length} images:`, imagesToRemove);
-          try {
-            const deletedImageIds = await deleteImagesFromStorageAndDatabase(imagesToRemove);
-            console.log(`[Form Submit] Successfully deleted ${deletedImageIds.length}/${imagesToRemove.length} images`);
-            
-            if (deletedImageIds.length < imagesToRemove.length) {
-              console.warn(`[Form Submit] Some images may have already been deleted or were not found`);
-            }
-          } catch (imageDeleteError) {
-            console.error(`[Form Submit] Image deletion failed:`, imageDeleteError);
-            // Don't fail the entire form submission if image deletion fails
-            // The listing update was successful, just log the error
-          }
+          console.log(`[Form Submit] Marked ${imagesToRemove.length} images for removal`);
+          // Note: With the new API, images are managed through the listings endpoint
+          // Image deletion will be handled by the backend when updating the listing
         }
       } else {
         // For new listings, we'll upload images separately after creating the listing

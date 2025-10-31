@@ -1,8 +1,8 @@
-# Code Documentation Guide
+# Kejalink - Code Documentation
 
 ## Overview
 
-This document provides comprehensive documentation for the Rentify Houses Kenya codebase, focusing on the listing service and image upload functionality.
+This document provides comprehensive documentation for the Kejalink codebase, focusing on the listing service and image upload functionality.
 
 ## Architecture
 

@@ -174,8 +174,8 @@ const ContactUsPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-medium text-gray-900">Email</h3>
-                    <p className="text-gray-600">support@rentifykenya.com</p>
-                    <p className="text-gray-600">info@rentifykenya.com</p>
+                    <p className="text-gray-600">support@kejalink.co.ke</p>
+                    <p className="text-gray-600">info@kejalink.co.ke</p>
                   </div>
                 </div>
 

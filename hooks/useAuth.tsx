@@ -1,16 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../services/supabaseClient';
-
-interface UserProfile {
-  id: string;
-  email: string;
-  full_name: string;
-  role: string;
-  is_verified_agent: boolean;
-}
+import { authAPI, storage, User } from '../services/apiClient';
 
 interface AuthContextType {
-  user: UserProfile | null;
+  user: User | null;
   loading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
@@ -22,75 +14,51 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .limit(1)
-      .maybeSingle();
-
-    if (error || !data) {
-      console.error('Error fetching profile:', error || 'No profile found');
-      setError(error?.message || 'No profile found');
-      return;
-    }
-
-    setUser(data);
-  };
-
-  // Monitor auth state
+  // Check for existing session on mount
   useEffect(() => {
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const currentUser = session?.user;
-      if (currentUser) {
-        await fetchProfile(currentUser.id);
-      } else {
+    const initAuth = async () => {
+      try {
+        const token = storage.getToken();
+        if (token) {
+          // Verify token is still valid by fetching profile
+          const { user: profile } = await authAPI.getProfile();
+          setUser(profile);
+        }
+      } catch (err) {
+        // Token invalid or expired, clear storage
+        storage.clear();
         setUser(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
-
-    // Initial session check
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        await fetchProfile(session.user.id);
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    })();
-
-    return () => {
-      listener.subscription.unsubscribe();
     };
+
+    initAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (error) {
-      console.error('Login error:', error.message);
-      setError(error.message);
+    try {
+      const response = await authAPI.login({ email, password });
+      
+      // Store token and user
+      storage.setToken(response.token);
+      storage.setUser(response.user);
+      setUser(response.user);
+    } catch (err: any) {
+      const errorMessage = err.message || 'Login failed';
+      console.error('Login error:', errorMessage);
+      setError(errorMessage);
+      throw err;
+    } finally {
       setLoading(false);
-      throw error;
     }
-
-    // Get session manually
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      await fetchProfile(session.user.id);
-    }
-
-    setLoading(false);
   };
 
   const register = async (email: string, password: string, name: string, role: string) => {
@@ -98,50 +66,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     setError(null);
 
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    try {
+      const response = await authAPI.register({
+        email,
+        password,
+        full_name: name,
+        role: role as 'tenant' | 'agent',
+      });
 
-    if (error || !data.user) {
-      console.error('Signup error:', error?.message);
-      setError(error?.message || 'Signup failed');
+      // Store token and user
+      storage.setToken(response.token);
+      storage.setUser(response.user);
+      setUser(response.user);
+    } catch (err: any) {
+      const errorMessage = err.message || 'Registration failed';
+      console.error('Registration error:', errorMessage);
+      setError(errorMessage);
+      throw err;
+    } finally {
       setLoading(false);
-      throw error || new Error('Signup failed');
     }
-
-    const { error: profileError } = await supabase.from('profiles').insert([{
-      id: data.user.id,
-      email,
-      full_name: name,
-      role,
-      is_verified_agent: false
-    }]);
-
-    if (profileError) {
-      console.error('Profile creation error:', profileError.message);
-      setError(profileError.message);
-      setLoading(false);
-      throw profileError;
-    }
-
-    // Manually fetch session and profile
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      await fetchProfile(session.user.id);
-    }
-
-    setLoading(false);
   };
 
   const logout = async () => {
     setLoading(true);
     setError(null);
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      setError(error.message);
+
+    try {
+      await authAPI.logout();
+      storage.clear();
+      setUser(null);
+    } catch (err: any) {
+      const errorMessage = err.message || 'Logout failed';
+      console.error('Logout error:', errorMessage);
+      setError(errorMessage);
+      throw err;
+    } finally {
       setLoading(false);
-      throw error;
     }
-    setUser(null);
-    setLoading(false);
   };
 
   const clearError = () => {

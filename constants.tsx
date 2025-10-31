@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const APP_NAME = "Rentify Kenya";
+export const APP_NAME = "Kejalink";
 
 export const NavigationLinks = [
   { name: "Home", path: "/" },
