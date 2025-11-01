@@ -1,11 +1,19 @@
 <?php
 /**
  * Authentication API Endpoints
- * Handles register, login, logout, and profile
+ * Handles register, login, logout, and password reset
  */
 
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../auth.php';
+
+// Load email configuration for password reset emails
+// This file should exist in the same directory (api/)
+if (file_exists(__DIR__ . '/email-config.php')) {
+    require_once __DIR__ . '/email-config.php';
+} else {
+    error_log("WARNING: email-config.php not found. Password reset emails will not work.");
+}
 
 $method = $_SERVER['REQUEST_METHOD'];
 $path = $_GET['action'] ?? '';
@@ -409,56 +417,6 @@ function handleResetPassword() {
         error_log("Reset Password Error: " . $e->getMessage());
         errorResponse('Failed to reset password', 500);
     }
-}
-
-/**
- * Send password reset email
- * NOTE: This is a basic implementation. In production, use a proper email service like SendGrid, AWS SES, etc.
- */
-function sendPasswordResetEmail($email, $name, $resetLink) {
-    $subject = "Password Reset - KejaLink";
-    $message = "
-        <html>
-        <head>
-            <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .button { display: inline-block; padding: 12px 24px; background-color: #10b981; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-                .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; }
-            </style>
-        </head>
-        <body>
-            <div class='container'>
-                <h2>Password Reset Request</h2>
-                <p>Hi {$name},</p>
-                <p>We received a request to reset your password for your KejaLink account. Click the button below to reset your password:</p>
-                <a href='{$resetLink}' class='button'>Reset Password</a>
-                <p>Or copy and paste this link into your browser:</p>
-                <p>{$resetLink}</p>
-                <p><strong>This link will expire in 1 hour.</strong></p>
-                <p>If you didn't request a password reset, you can safely ignore this email.</p>
-                <div class='footer'>
-                    <p>© " . date('Y') . " KejaLink. All rights reserved.</p>
-                    <p>This is an automated email. Please do not reply.</p>
-                </div>
-            </div>
-        </body>
-        </html>
-    ";
-    
-    $headers = "MIME-Version: 1.0" . "\r\n";
-    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-    $headers .= "From: KejaLink <noreply@kejalink.co.ke>" . "\r\n";
-    
-    // Send email
-    $sent = mail($email, $subject, $message, $headers);
-    
-    // Log if email failed to send
-    if (!$sent) {
-        error_log("Failed to send password reset email to: " . $email);
-    }
-    
-    return $sent;
 }
 
 ?>
