@@ -23,6 +23,15 @@ switch ($path) {
     case 'logout':
         handleLogout();
         break;
+    case 'forgot-password':
+        handleForgotPassword();
+        break;
+    case 'validate-reset-token':
+        handleValidateResetToken();
+        break;
+    case 'reset-password':
+        handleResetPassword();
+        break;
     default:
         errorResponse('Invalid endpoint', 404);
 }
@@ -221,6 +230,235 @@ function handleLogout() {
     // by deleting the token from localStorage/cookies
     
     jsonResponse(['message' => 'Logout successful']);
+}
+
+/**
+ * Forgot Password - Request password reset
+ * POST /api/auth.php?action=forgot-password
+ * Body: { email }
+ */
+function handleForgotPassword() {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        errorResponse('Method not allowed', 405);
+    }
+    
+    $data = getRequestBody();
+    $email = $data['email'] ?? '';
+    
+    if (!$email || !validateEmail($email)) {
+        errorResponse('Valid email is required');
+    }
+    
+    try {
+        $db = Database::getInstance()->getConnection();
+        
+        // Check if user exists
+        $stmt = $db->prepare("SELECT id, email, full_name FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch();
+        
+        // Always return success (security best practice - don't reveal if email exists)
+        if (!$user) {
+            jsonResponse(['message' => 'If an account exists with this email, you will receive password reset instructions.']);
+            return;
+        }
+        
+        // Generate secure random token
+        $token = bin2hex(random_bytes(32)); // 64-character hex string
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour')); // Token valid for 1 hour
+        
+        // Invalidate any existing tokens for this user
+        $stmt = $db->prepare("UPDATE password_reset_tokens SET used = TRUE WHERE user_id = ? AND used = FALSE");
+        $stmt->execute([$user['id']]);
+        
+        // Create new reset token
+        $stmt = $db->prepare("
+            INSERT INTO password_reset_tokens (id, user_id, token, expires_at)
+            VALUES (?, ?, ?, ?)
+        ");
+        $stmt->execute([
+            generateUUID(),
+            $user['id'],
+            $token,
+            $expiresAt
+        ]);
+        
+        // Send email with reset link
+        $resetLink = APP_URL . "/reset-password?token=" . $token;
+        sendPasswordResetEmail($user['email'], $user['full_name'], $resetLink);
+        
+        jsonResponse(['message' => 'If an account exists with this email, you will receive password reset instructions.']);
+        
+    } catch (PDOException $e) {
+        error_log("Forgot Password Error: " . $e->getMessage());
+        errorResponse('Failed to process request', 500);
+    }
+}
+
+/**
+ * Validate Reset Token
+ * GET /api/auth.php?action=validate-reset-token&token=xxx
+ */
+function handleValidateResetToken() {
+    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+        errorResponse('Method not allowed', 405);
+    }
+    
+    $token = $_GET['token'] ?? '';
+    
+    if (!$token) {
+        errorResponse('Token is required');
+    }
+    
+    try {
+        $db = Database::getInstance()->getConnection();
+        
+        $stmt = $db->prepare("
+            SELECT id, user_id, expires_at, used 
+            FROM password_reset_tokens 
+            WHERE token = ?
+        ");
+        $stmt->execute([$token]);
+        $resetToken = $stmt->fetch();
+        
+        if (!$resetToken) {
+            errorResponse('Invalid reset token', 404);
+        }
+        
+        if ($resetToken['used']) {
+            errorResponse('This reset link has already been used', 400);
+        }
+        
+        if (strtotime($resetToken['expires_at']) < time()) {
+            errorResponse('This reset link has expired', 400);
+        }
+        
+        jsonResponse(['valid' => true, 'message' => 'Token is valid']);
+        
+    } catch (PDOException $e) {
+        error_log("Validate Token Error: " . $e->getMessage());
+        errorResponse('Failed to validate token', 500);
+    }
+}
+
+/**
+ * Reset Password
+ * POST /api/auth.php?action=reset-password
+ * Body: { token, new_password }
+ */
+function handleResetPassword() {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        errorResponse('Method not allowed', 405);
+    }
+    
+    $data = getRequestBody();
+    $token = $data['token'] ?? '';
+    $newPassword = $data['new_password'] ?? '';
+    
+    if (!$token || !$newPassword) {
+        errorResponse('Token and new password are required');
+    }
+    
+    if (strlen($newPassword) < 6) {
+        errorResponse('Password must be at least 6 characters');
+    }
+    
+    try {
+        $db = Database::getInstance()->getConnection();
+        $db->beginTransaction();
+        
+        // Validate token
+        $stmt = $db->prepare("
+            SELECT id, user_id, expires_at, used 
+            FROM password_reset_tokens 
+            WHERE token = ?
+        ");
+        $stmt->execute([$token]);
+        $resetToken = $stmt->fetch();
+        
+        if (!$resetToken) {
+            $db->rollBack();
+            errorResponse('Invalid reset token', 404);
+        }
+        
+        if ($resetToken['used']) {
+            $db->rollBack();
+            errorResponse('This reset link has already been used', 400);
+        }
+        
+        if (strtotime($resetToken['expires_at']) < time()) {
+            $db->rollBack();
+            errorResponse('This reset link has expired', 400);
+        }
+        
+        // Update user password
+        $passwordHash = Auth::hashPassword($newPassword);
+        $stmt = $db->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+        $stmt->execute([$passwordHash, $resetToken['user_id']]);
+        
+        // Mark token as used
+        $stmt = $db->prepare("UPDATE password_reset_tokens SET used = TRUE WHERE id = ?");
+        $stmt->execute([$resetToken['id']]);
+        
+        $db->commit();
+        
+        jsonResponse(['message' => 'Password reset successful']);
+        
+    } catch (PDOException $e) {
+        if (isset($db)) $db->rollBack();
+        error_log("Reset Password Error: " . $e->getMessage());
+        errorResponse('Failed to reset password', 500);
+    }
+}
+
+/**
+ * Send password reset email
+ * NOTE: This is a basic implementation. In production, use a proper email service like SendGrid, AWS SES, etc.
+ */
+function sendPasswordResetEmail($email, $name, $resetLink) {
+    $subject = "Password Reset - KejaLink";
+    $message = "
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .button { display: inline-block; padding: 12px 24px; background-color: #10b981; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+                .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <h2>Password Reset Request</h2>
+                <p>Hi {$name},</p>
+                <p>We received a request to reset your password for your KejaLink account. Click the button below to reset your password:</p>
+                <a href='{$resetLink}' class='button'>Reset Password</a>
+                <p>Or copy and paste this link into your browser:</p>
+                <p>{$resetLink}</p>
+                <p><strong>This link will expire in 1 hour.</strong></p>
+                <p>If you didn't request a password reset, you can safely ignore this email.</p>
+                <div class='footer'>
+                    <p>© " . date('Y') . " KejaLink. All rights reserved.</p>
+                    <p>This is an automated email. Please do not reply.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    ";
+    
+    $headers = "MIME-Version: 1.0" . "\r\n";
+    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+    $headers .= "From: KejaLink <noreply@kejalink.co.ke>" . "\r\n";
+    
+    // Send email
+    $sent = mail($email, $subject, $message, $headers);
+    
+    // Log if email failed to send
+    if (!$sent) {
+        error_log("Failed to send password reset email to: " . $email);
+    }
+    
+    return $sent;
 }
 
 ?>

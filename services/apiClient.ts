@@ -96,6 +96,24 @@ export const authAPI = {
       method: 'POST',
     });
   },
+
+  forgotPassword: async (email: string): Promise<{ message: string }> => {
+    return apiRequest('/api/auth.php?action=forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  validateResetToken: async (token: string): Promise<{ valid: boolean }> => {
+    return apiRequest(`/api/auth.php?action=validate-reset-token&token=${encodeURIComponent(token)}`);
+  },
+
+  resetPassword: async (token: string, newPassword: string): Promise<{ message: string }> => {
+    return apiRequest('/api/auth.php?action=reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, new_password: newPassword }),
+    });
+  },
 };
 
 // ============================================

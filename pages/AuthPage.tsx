@@ -112,14 +112,28 @@ const AuthPage: React.FC = () => {
             placeholder="you@example.com"
             required
           />
-          <Input
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-          />
+          <div>
+            <Input
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              showPasswordToggle={true}
+            />
+            {mode === 'login' && (
+              <div className="text-right -mt-2">
+                <button
+                  type="button"
+                  onClick={() => navigate('/forgot-password')}
+                  className="text-sm text-green-600 hover:text-green-500 font-medium"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+            )}
+          </div>
 
           {mode === 'register' && (
             <div>

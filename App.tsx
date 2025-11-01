@@ -7,6 +7,8 @@ import ListingsPage from './pages/ListingsPage';
 import ListingDetailPage from './pages/ListingDetailPage';
 import AgentDashboardPage from './pages/AgentDashboardPage';
 import AuthPage from './pages/AuthPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import ContactUsPage from './pages/ContactUsPage';
@@ -36,6 +38,8 @@ const App: React.FC = () => {
             element={user ? <AgentDashboardPage /> : <Navigate to="/auth?mode=login&returnTo=/dashboard/agent" replace />} 
           />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/terms-of-service" element={<TermsOfServicePage />} />
           <Route path="/contact-us" element={<ContactUsPage />} />
