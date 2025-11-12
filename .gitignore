@@ -38,3 +38,13 @@ composer.lock
 *.sln
 *.sw?
 .vercel
+
+# More sensitive files
+php-backend/api/email-config.php
+php-backend/api/email-config-improved.php
+php-backend/update-jwt-secret.php
+php-backend/email-config.example.php
+test-email.php
+
+# Build artifacts (optional)
+/public/dist
