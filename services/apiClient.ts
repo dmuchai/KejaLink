@@ -3,7 +3,7 @@
  * Handles all HTTP requests to the PHP API
  */
 
-const API_BASE_URL = 'https://kejalink.co.ke/api';
+const API_BASE_URL = 'https://kejalink.co.ke';
 
 // Helper function to get auth token
 function getAuthToken(): string | null {

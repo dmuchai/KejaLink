@@ -1,3 +1,4 @@
+import { UserRole } from "../../types";
 import React, { useState, useEffect } from 'react';
 import { PropertyListing, User, PropertyImage } from '../../types';
 import { geminiService } from '../../services/geminiService';
@@ -160,6 +161,12 @@ const ListingFormModal: React.FC<ListingFormModalProps> = ({ isOpen, onClose, on
     setFormError('');
     try {
       const enhanced = await geminiService.enhanceListingContent({
+        id: "",
+        agent: { id: "", name: "", email: "", role: "agent" as UserRole.AGENT, isVerifiedAgent: false, createdAt: new Date().toISOString() },
+        images: [],
+        status: "available" as const,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(), isFeatured: false, views: 0, saves: 0,
         title: formData.title,
         description: formData.description,
         location: formData.location,

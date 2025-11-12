@@ -137,5 +137,4 @@ This project is licensed under the MIT License.
 Dennis Muchai
 Github: @dmuchai
 LinkedIn: https://www.linkedin.com/in/dmmuchai/
-Email: dmmuchai@gmail.com
-Website: https://dennis-dev-space-dmmuchai.replit.app/
+Website: https://dennis-muchai.vercel.app/
