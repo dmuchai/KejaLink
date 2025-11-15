@@ -17,8 +17,11 @@ const Navbar: React.FC = () => {
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="text-2xl font-bold text-green-600">
-            {APP_NAME}
+          <Link to="/" className="flex items-center space-x-2 text-2xl font-bold text-green-600 hover:text-green-700 transition-colors">
+            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            <span>{APP_NAME}</span>
           </Link>
           
           {/* Desktop Menu */}

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SearchBar, { SearchFilters } from '../components/SearchBar';
@@ -41,9 +40,9 @@ const HomePage: React.FC = () => {
   return (
     <div className="space-y-12">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-green-600 to-teal-500 text-white py-16 md:py-24 rounded-lg shadow-xl overflow-hidden">
+      <section className="relative bg-gray-900 text-white py-16 md:py-24 rounded-lg shadow-xl overflow-hidden">
         <div className="absolute inset-0">
-          <img src={PlaceholderImage(1200,800)} alt="Nairobi Skyline" className="w-full h-full object-cover opacity-20"/>
+          <img src="/images/nairobi-skyline-hero.png" alt="Nairobi skyline with modern residential buildings" className="w-full h-full object-cover opacity-40"/>
         </div>
         <div className="container mx-auto px-4 text-center relative z-10">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Find Your Next Home in Kenya</h1>
