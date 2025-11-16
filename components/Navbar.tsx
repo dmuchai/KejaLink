@@ -51,7 +51,7 @@ const Navbar: React.FC = () => {
               </Link>
             ))}
             {/* Products dropdown */}
-            <div className="relative group pt-2">
+            <div className="relative group">
               <button className="flex items-center gap-1 text-gray-700 hover:text-green-600 transition-colors" aria-haspopup="menu" aria-expanded="false">
                 <span>Products</span>
                 <svg
@@ -106,7 +106,7 @@ const Navbar: React.FC = () => {
               <span>List a Property</span>
             </button>
             {user ? (
-              <div className="relative group pt-2">
+              <div className="relative group">
                 <button className="flex items-center text-gray-700 hover:text-green-600">
                   <UserCircleIcon className="w-6 h-6 mr-1" />
                   <span>{user.full_name.split(' ')[0]}</span> 
