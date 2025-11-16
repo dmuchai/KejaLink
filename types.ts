@@ -36,8 +36,10 @@ export interface PropertyListing {
     address: string;
     county: string;
     neighborhood: string;
-    lat?: number;
-    lng?: number;
+    latitude?: number;
+    longitude?: number;
+    lat?: number; // legacy support
+    lng?: number; // legacy support
   };
   price: number; // KES
   bedrooms: number;

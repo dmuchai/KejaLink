@@ -89,6 +89,8 @@ interface PropertyMapProps {
       address: string;
       lat?: number;
       lng?: number;
+      latitude?: number;
+      longitude?: number;
     };
   }>;
   selectedListingId?: string;
@@ -106,22 +108,25 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
 }) => {
   const [mapError, setMapError] = useState<string | null>(null);
 
-  // Filter listings that have coordinates
+  // Filter listings that have coordinates (support both old lat/lng and new latitude/longitude)
   const listingsWithCoords = listings.filter(
-    listing => listing.location.lat && listing.location.lng
+    listing => (listing.location.lat && listing.location.lng) || 
+               (listing.location.latitude && listing.location.longitude)
   );
 
   // Default center (Nairobi, Kenya)
   const defaultCenter = { lat: -1.2921, lng: 36.8219 };
   
+  const getCoords = (location: any) => ({
+    lat: location.latitude || location.lat,
+    lng: location.longitude || location.lng
+  });
+  
   const center = listingsWithCoords.length > 0 
-    ? { lat: listingsWithCoords[0].location.lat!, lng: listingsWithCoords[0].location.lng! }
+    ? getCoords(listingsWithCoords[0].location)
     : defaultCenter;
 
-  const markers = listingsWithCoords.map(listing => ({
-    lat: listing.location.lat!,
-    lng: listing.location.lng!
-  }));
+  const markers = listingsWithCoords.map(listing => getCoords(listing.location));
 
   const handleMarkerClick = (index: number) => {
     if (onListingSelect) {

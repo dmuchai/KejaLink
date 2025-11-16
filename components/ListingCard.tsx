@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { PropertyListing, PropertyImage } from '../types';
-import { MapPinIcon, CheckBadgeIcon, StarIcon, PlaceholderImage } from '../constants';
+import { MapPinIcon, CheckBadgeIcon, StarIcon, PlaceholderImage, PropertyTypes } from '../constants';
 
 interface ListingCardProps {
   listing: PropertyListing;
@@ -79,6 +79,14 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
         </div>
 
         <p className="text-xl font-bold text-green-600 my-2">{formatPrice(listing.price)}/mo</p>
+
+        {listing.propertyType && (
+          <div className="mb-2">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              {PropertyTypes.find(pt => pt.value === listing.propertyType)?.label || listing.propertyType}
+            </span>
+          </div>
+        )}
 
         <div className="flex items-center space-x-3 text-sm text-gray-600 mt-1">
           <span>{listing.bedrooms} bed{listing.bedrooms > 1 ? 's' : ''}</span>

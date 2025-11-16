@@ -160,7 +160,10 @@ export const authAPI = {
 export interface Location {
   county: string;
   area: string;
+  neighborhood?: string;
   address?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface PropertyImage {
@@ -174,7 +177,7 @@ export interface Listing {
   id: string;
   title: string;
   description: string;
-  property_type: 'apartment' | 'house' | 'studio' | 'bedsitter' | 'commercial';
+  property_type: 'apartment' | 'studio' | 'bedsitter' | 'bungalow' | 'maisonette' | 'townhouse';
   price: number;
   location: Location;
   bedrooms: number;
@@ -210,7 +213,7 @@ export interface ListingsResponse {
 export interface CreateListingData {
   title: string;
   description: string;
-  property_type: 'apartment' | 'house' | 'studio' | 'bedsitter' | 'commercial';
+  property_type: 'apartment' | 'studio' | 'bedsitter' | 'bungalow' | 'maisonette' | 'townhouse';
   price: number;
   location: Location;
   bedrooms: number;

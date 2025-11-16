@@ -147,6 +147,15 @@ function getListings() {
             $listing['images'] = json_decode($listing['images'] ?? '[]', true) ?? [];
             $listing['ai_scan'] = isset($listing['ai_scan']) && $listing['ai_scan'] ? json_decode($listing['ai_scan'], true) : null;
             
+            // Normalize location: convert 'area' to 'neighborhood' for frontend consistency
+            if (isset($listing['location']['area']) && !isset($listing['location']['neighborhood'])) {
+                $listing['location']['neighborhood'] = $listing['location']['area'];
+            }
+            // Also convert 'city' to 'neighborhood' if neighborhood is not set
+            if (isset($listing['location']['city']) && !isset($listing['location']['neighborhood'])) {
+                $listing['location']['neighborhood'] = $listing['location']['city'];
+            }
+            
             // Group agent data
             $listing['agent'] = [
                 'id' => $listing['agent_id'],
@@ -216,6 +225,15 @@ function getListingById($id) {
         $listing['location'] = json_decode($listing['location'] ?? '{}', true);
         $listing['amenities'] = json_decode($listing['amenities'] ?? '[]', true) ?? [];
         $listing['images'] = $images;
+        
+        // Normalize location: convert 'area' to 'neighborhood' for frontend consistency
+        if (isset($listing['location']['area']) && !isset($listing['location']['neighborhood'])) {
+            $listing['location']['neighborhood'] = $listing['location']['area'];
+        }
+        // Also convert 'city' to 'neighborhood' if neighborhood is not set
+        if (isset($listing['location']['city']) && !isset($listing['location']['neighborhood'])) {
+            $listing['location']['neighborhood'] = $listing['location']['city'];
+        }
         
         // Group agent data
         $listing['agent'] = [

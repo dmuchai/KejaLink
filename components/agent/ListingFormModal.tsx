@@ -7,6 +7,7 @@ import Input from '../Input';
 import Textarea from '../Textarea';
 import Select from '../Select';
 import Alert from '../Alert';
+import { PlacesAutocomplete } from '../PlacesAutocomplete';
 import { SparklesIcon, KenyanCounties, PropertyTypes } from '../../constants';
 
 interface ListingFormModalProps {
@@ -218,7 +219,25 @@ const ListingFormModal: React.FC<ListingFormModalProps> = ({ isOpen, onClose, on
               <SparklesIcon className="w-4 h-4" /> {!isEnhancing && 'AI'}
             </Button>
           </div>
-          <Input label="Address (Street, Building)" name="location.address" value={formData.location.address ?? ''} onChange={handleChange} required />
+          <PlacesAutocomplete
+            label="Address (Street, Building)"
+            value={formData.location.address ?? ''}
+            onChange={(value) => setFormData(prev => ({ ...prev, location: { ...prev.location, address: value } }))}
+            onPlaceSelect={(place) => {
+              setFormData(prev => ({
+                ...prev,
+                location: {
+                  address: place.address,
+                  county: place.county || prev.location.county,
+                  neighborhood: place.city || prev.location.neighborhood,
+                  latitude: place.latitude,
+                  longitude: place.longitude,
+                },
+              }));
+            }}
+            placeholder="Start typing an address in Kenya..."
+            required
+          />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Select label="County" name="location.county" options={countyOptions} value={formData.location.county ?? 'Nairobi'} onChange={handleChange} required />
             <Input label="Neighborhood" name="location.neighborhood" value={formData.location.neighborhood ?? ''} onChange={handleChange} required />

@@ -8,6 +8,8 @@ interface SinglePropertyMapProps {
     address: string;
     lat?: number;
     lng?: number;
+    latitude?: number;
+    longitude?: number;
   };
   title: string;
   className?: string;
@@ -25,9 +27,15 @@ const SinglePropertyMap: React.FC<SinglePropertyMapProps> = ({
   // Default center (Nairobi, Kenya) if no coordinates
   const defaultCenter = { lat: -1.2921, lng: 36.8219 };
   
-  const hasCoordinates = location.lat && location.lng;
+  // Support both old lat/lng and new latitude/longitude
+  const hasCoordinates = (location.lat && location.lng) || 
+                         (location.latitude && location.longitude);
+  
   const center = hasCoordinates 
-    ? { lat: location.lat!, lng: location.lng! }
+    ? { 
+        lat: location.latitude || location.lat!, 
+        lng: location.longitude || location.lng! 
+      }
     : defaultCenter;
 
   const MapComponent: React.FC = () => {

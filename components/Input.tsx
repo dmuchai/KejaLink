@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -8,7 +8,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   showPasswordToggle?: boolean; // New prop to enable password visibility toggle
 }
 
-const Input: React.FC<InputProps> = ({ 
+const Input = forwardRef<HTMLInputElement, InputProps>(({ 
   label, 
   name, 
   error, 
@@ -17,7 +17,7 @@ const Input: React.FC<InputProps> = ({
   showPasswordToggle = false,
   type,
   ...props 
-}) => {
+}, ref) => {
   const [showPassword, setShowPassword] = useState(false);
   
   // Determine the actual input type
@@ -34,6 +34,7 @@ const Input: React.FC<InputProps> = ({
       )}
       <div className="relative">
         <input
+          ref={ref}
           id={name}
           name={name}
           type={inputType}
@@ -58,6 +59,8 @@ const Input: React.FC<InputProps> = ({
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );
-};
+});
+
+Input.displayName = 'Input';
 
 export default Input;

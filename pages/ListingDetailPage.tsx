@@ -9,7 +9,7 @@ import RatingStars from '../components/RatingStars';
 import Button from '../components/Button';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Alert from '../components/Alert';
-import { MapPinIcon, CheckBadgeIcon, StarIcon, PlaceholderImage, SparklesIcon } from '../constants';
+import { MapPinIcon, CheckBadgeIcon, StarIcon, PlaceholderImage, SparklesIcon, PropertyTypes } from '../constants';
 import { useAuth } from '../hooks/useAuth';
 import Textarea from '../components/Textarea';
 
@@ -171,6 +171,11 @@ const ListingDetailPage: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <div className="text-3xl font-bold text-green-600">{formatPrice(listing.price)}/month</div>
           <div className="flex items-center space-x-4 text-sm text-gray-600">
+            {listing.propertyType && (
+              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">
+                {PropertyTypes.find(pt => pt.value === listing.propertyType)?.label || listing.propertyType}
+              </span>
+            )}
             <span className="bg-gray-100 px-3 py-1 rounded-full">{listing.bedrooms} Bedroom{listing.bedrooms > 1 ? 's' : ''}</span>
             <span className="bg-gray-100 px-3 py-1 rounded-full">{listing.bathrooms} Bathroom{listing.bathrooms > 1 ? 's' : ''}</span>
             {Number(listing.areaSqFt) > 0 && (
