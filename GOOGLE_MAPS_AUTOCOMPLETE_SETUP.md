@@ -170,9 +170,9 @@ Required in `.env`:
 VITE_GOOGLE_MAPS_API_KEY=your_api_key_here
 ```
 
-Current key in `.env`: `AIzaSyD8CaQ3HnH78QhB55qWjD8hPbpdeHVvh10`
+**Important**: The API key should be stored in `.env` file (not committed to git).
 
-**Important**: Ensure this key has:
+Ensure your API key has:
 - ✅ Maps JavaScript API enabled
 - ✅ Places API enabled
 - ✅ Geocoding API enabled (for reverse geocoding if needed)
