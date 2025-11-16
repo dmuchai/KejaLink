@@ -13,6 +13,12 @@ const Navbar: React.FC = () => {
     navigate('/');
   };
 
+  // Build navigation links dynamically: hide Agent Dashboard until an agent is logged in
+  const computedLinks = NavigationLinks.filter(l => l.name !== 'Agent Dashboard');
+  if (user && user.role === 'agent') {
+    computedLinks.push({ name: 'Agent Dashboard', path: '/dashboard/agent' });
+  }
+
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4">
@@ -26,7 +32,7 @@ const Navbar: React.FC = () => {
           
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-6">
-            {NavigationLinks.map((link) => (
+            {computedLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
@@ -75,7 +81,7 @@ const Navbar: React.FC = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white shadow-lg absolute w-full">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {NavigationLinks.map((link) => (
+            {computedLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
