@@ -7,11 +7,13 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { PropertyListing } from '../types';
 import { listingService } from '../services/listingService';
 import { PlaceholderImage, SparklesIcon, MapPinIcon, CheckBadgeIcon } from '../constants';
+import { useAuth } from '../hooks/useAuth';
 
 const HomePage: React.FC = () => {
   const [featuredListings, setFeaturedListings] = useState<PropertyListing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
 
   const fetchFeaturedListings = useCallback(async () => {
     setIsLoading(true);
@@ -119,16 +121,23 @@ const HomePage: React.FC = () => {
       </section>
 
 
-      {/* Call to Action for Agents */}
-      <section className="bg-green-600 text-white py-12 px-6 rounded-lg shadow-xl text-center">
-        <h2 className="text-3xl font-semibold mb-4">Are you a Property Manager or Landlord?</h2>
-        <p className="text-lg mb-6 max-w-xl mx-auto">
-          Reach thousands of genuine tenants. Post your listings on a trusted platform with AI-powered verification and tools to help you succeed.
-        </p>
-        <Button variant="outline" size="lg" className="bg-white text-green-600 border-white hover:bg-gray-100" onClick={() => navigate('/auth?mode=register&role=agent')}>
-          Register as a Property Manager
-        </Button>
-      </section>
+      {/* Call to Action for Agents - hidden when logged in */}
+      {!authLoading && !user && (
+        <section className="bg-green-600 text-white py-12 px-6 rounded-lg shadow-xl text-center">
+          <h2 className="text-3xl font-semibold mb-4">Are you a Property Manager or Landlord?</h2>
+          <p className="text-lg mb-6 max-w-xl mx-auto">
+            Reach thousands of genuine tenants. Post your listings on a trusted platform with AI-powered verification and tools to help you succeed.
+          </p>
+          <Button
+            variant="outline"
+            size="lg"
+            className="bg-white text-green-600 border-white hover:bg-gray-100"
+            onClick={() => navigate('/auth?mode=register&role=agent')}
+          >
+            Register as a Property Manager
+          </Button>
+        </section>
+      )}
     </div>
   );
 };
