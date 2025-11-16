@@ -123,12 +123,14 @@ export const createListing = async (
     const createData: CreateListingData = {
       title: listingData.title,
       description: listingData.description || '',
-      property_type: 'apartment',
+      property_type: listingData.propertyType || 'apartment',
       price: listingData.price,
       location: {
         county: listingData.location.county,
         area: listingData.location.neighborhood,
         address: listingData.location.address,
+        latitude: listingData.location.latitude,
+        longitude: listingData.location.longitude,
       },
       bedrooms: listingData.bedrooms || 1,
       bathrooms: listingData.bathrooms || 1,
@@ -158,12 +160,15 @@ export const updateListing = async (
 
     if (updates.title) updateData.title = updates.title;
     if (updates.description) updateData.description = updates.description;
+    if (updates.propertyType) updateData.property_type = updates.propertyType;
     if (updates.price !== undefined) updateData.price = updates.price;
     if (updates.location) {
       updateData.location = {
         county: updates.location.county,
         area: updates.location.neighborhood,
         address: updates.location.address,
+        latitude: updates.location.latitude,
+        longitude: updates.location.longitude,
       };
     }
     if (updates.bedrooms) updateData.bedrooms = updates.bedrooms;
