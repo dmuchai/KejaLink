@@ -2,6 +2,9 @@
   RewriteEngine On
   RewriteBase /
   
+  # Map legacy /api/uploads/* to /uploads/* (internal rewrite)
+  RewriteRule ^api/uploads/(.*)$ uploads/$1 [L]
+  
   # Don't rewrite files or directories that exist
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d

@@ -8,7 +8,7 @@ interface ListingCardProps {
 }
 
 const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
-  const primaryImageToDisplay: PropertyImage = (listing.images?.find(img => img.url)) || {
+  const primaryImageToDisplay: PropertyImage = (listing.images && listing.images.length > 0 && listing.images[0]) || {
     id: `placeholder-${listing.id}`,
     url: PlaceholderImage(400, 300),
     altText: 'Placeholder property image',
@@ -32,12 +32,12 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
             alt={primaryImageToDisplay.altText || listing.title}
             className="w-full h-56 object-cover"
           />
-          {listing.isFeatured && (
+          {!!listing.isFeatured && (
             <span className="absolute top-2 left-2 bg-yellow-400 text-yellow-800 text-xs font-semibold px-2 py-1 rounded">
               Featured
             </span>
           )}
-          {listing.agent?.isVerifiedAgent && (
+          {!!listing.agent?.isVerifiedAgent && (
             <span className="absolute top-2 right-2 bg-green-100 text-green-700 text-xs font-semibold px-2 py-1 rounded-full flex items-center">
               <CheckBadgeIcon className="w-4 h-4 mr-1 text-green-600" /> Verified Agent
             </span>
@@ -84,7 +84,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
           <span>{listing.bedrooms} bed{listing.bedrooms > 1 ? 's' : ''}</span>
           <span className="text-gray-300">|</span>
           <span>{listing.bathrooms} bath{listing.bathrooms > 1 ? 's' : ''}</span>
-          {listing.areaSqFt && (
+          {listing.areaSqFt > 0 && (
             <>
               <span className="text-gray-300">|</span>
               <span>{listing.areaSqFt} sqft</span>
@@ -105,10 +105,12 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
               />
               <span className="text-xs text-gray-500">{listing.agent?.name || 'Agent'}</span>
             </div>
-            <div className="flex items-center text-xs text-gray-500">
-              <StarIcon className="w-4 h-4 text-yellow-400 mr-1" />
-              <span>{(Math.random() * (5 - 3.5) + 3.5).toFixed(1)} ({Math.floor(Math.random() * 50) + 5} reviews)</span>
-            </div>
+            {typeof listing.ratingAverage === 'number' && typeof listing.ratingCount === 'number' && listing.ratingCount > 0 ? (
+              <div className="flex items-center text-xs text-gray-500">
+                <StarIcon className="w-4 h-4 text-yellow-400 mr-1" />
+                <span>{listing.ratingAverage.toFixed(1)} ({listing.ratingCount} reviews)</span>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

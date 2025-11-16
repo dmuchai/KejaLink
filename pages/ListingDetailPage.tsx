@@ -173,7 +173,9 @@ const ListingDetailPage: React.FC = () => {
           <div className="flex items-center space-x-4 text-sm text-gray-600">
             <span className="bg-gray-100 px-3 py-1 rounded-full">{listing.bedrooms} Bedroom{listing.bedrooms > 1 ? 's' : ''}</span>
             <span className="bg-gray-100 px-3 py-1 rounded-full">{listing.bathrooms} Bathroom{listing.bathrooms > 1 ? 's' : ''}</span>
-            {listing.areaSqFt && <span className="bg-gray-100 px-3 py-1 rounded-full">{listing.areaSqFt} sqft</span>}
+            {Number(listing.areaSqFt) > 0 && (
+              <span className="bg-gray-100 px-3 py-1 rounded-full">{listing.areaSqFt} sqft</span>
+            )}
           </div>
         </div>
 

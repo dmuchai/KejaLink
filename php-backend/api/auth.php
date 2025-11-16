@@ -4,16 +4,23 @@
  * Handles register, login, logout, and password reset
  */
 
-require_once __DIR__ . '/../config.php';
+// Load local config if it exists, otherwise use production config
+if (file_exists(__DIR__ . '/../config.local.php')) {
+    require_once __DIR__ . '/../config.local.php';
+} else {
+    require_once __DIR__ . '/../config.php';
+}
 require_once __DIR__ . '/../auth.php';
 
-// Load email configuration for password reset emails
-// This file should exist in the same directory (api/)
+// Load email configuration for password reset emails (commented out for local dev without PHPMailer)
+// Uncomment if you need password reset emails and have installed PHPMailer via Composer
+/*
 if (file_exists(__DIR__ . '/email-config.php')) {
     require_once __DIR__ . '/email-config.php';
 } else {
     error_log("WARNING: email-config.php not found. Password reset emails will not work.");
 }
+*/
 
 $method = $_SERVER['REQUEST_METHOD'];
 $path = $_GET['action'] ?? '';
@@ -142,12 +149,17 @@ function handleLogin() {
         errorResponse('Method not allowed', 405);
     }
     
-    $data = getRequestBody();
+    $rawInput = file_get_contents('php://input');
+    error_log("Login attempt - Raw input: " . $rawInput);
+    
+    $data = json_decode($rawInput, true) ?? [];
+    error_log("Login attempt - Parsed body: " . json_encode($data));
     
     $email = $data['email'] ?? '';
     $password = $data['password'] ?? '';
     
     if (!$email || !$password) {
+        error_log("Login failed - Missing email or password. Email: " . ($email ? 'provided' : 'missing') . ", Password: " . ($password ? 'provided' : 'missing'));
         errorResponse('Email and password are required');
     }
     
@@ -164,11 +176,16 @@ function handleLogin() {
         $user = $stmt->fetch();
         
         if (!$user) {
+            error_log("Login failed - User not found for email: " . $email);
             errorResponse('Invalid email or password', 401);
         }
         
         // Verify password
-        if (!Auth::verifyPassword($password, $user['password_hash'])) {
+        $passwordValid = Auth::verifyPassword($password, $user['password_hash']);
+        error_log("Login attempt - Password verification result: " . ($passwordValid ? 'valid' : 'invalid'));
+        
+        if (!$passwordValid) {
+            error_log("Login failed - Invalid password for email: " . $email);
             errorResponse('Invalid email or password', 401);
         }
         
@@ -178,6 +195,8 @@ function handleLogin() {
         // Remove password hash from response
         unset($user['password_hash']);
         
+        error_log("Login successful for email: " . $email);
+        
         jsonResponse([
             'message' => 'Login successful',
             'token' => $token,
@@ -186,6 +205,7 @@ function handleLogin() {
         
     } catch (PDOException $e) {
         error_log("Login Error: " . $e->getMessage());
+        error_log("Login Error - Stack trace: " . $e->getTraceAsString());
         errorResponse('Login failed', 500);
     }
 }

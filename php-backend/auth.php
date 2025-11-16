@@ -4,7 +4,14 @@
  * Handles token creation, validation, and user authentication
  */
 
-require_once 'config.php';
+// Load local config if it exists, otherwise use production config (only if not already loaded)
+if (!defined('DB_HOST')) {
+    if (file_exists(__DIR__ . '/config.local.php')) {
+        require_once __DIR__ . '/config.local.php';
+    } else {
+        require_once __DIR__ . '/config.php';
+    }
+}
 
 class Auth {
     

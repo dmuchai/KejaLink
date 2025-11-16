@@ -21,6 +21,7 @@ dist-ssr
 
 # PHP Backend - Sensitive Configuration
 php-backend/config.php
+php-backend/config.local.php
 php-backend/email-config.php
 php-backend/uploads/
 php-backend/vendor/

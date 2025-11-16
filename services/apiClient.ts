@@ -3,7 +3,29 @@
  * Handles all HTTP requests to the PHP API
  */
 
-const API_BASE_URL = 'https://kejalink.co.ke';
+// Determine API base URL
+// Priority: explicit VITE_API_BASE_URL -> current origin (works for prod and dev proxy) -> fallback
+const getDefaultBase = () => {
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin;
+  }
+  return (import.meta.env.VITE_FALLBACK_ORIGIN as string) || 'https://kejalink.co.ke';
+};
+
+const ENV_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined);
+const isBrowser = typeof window !== 'undefined';
+const isLocalOrigin = isBrowser && /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname);
+const isEnvLocalhost = !!ENV_BASE && /localhost|127\.0\.0\.1/.test(ENV_BASE);
+
+// Safety: if a localhost ENV_BASE leaks into a non-local build, ignore it and use current origin.
+const API_BASE_URL: string = (!ENV_BASE || (!isLocalOrigin && isEnvLocalhost))
+  ? getDefaultBase()
+  : ENV_BASE;
+
+if (import.meta.env.DEV) {
+  // eslint-disable-next-line no-console
+  console.log('API Base URL:', API_BASE_URL);
+}
 
 // Helper function to get auth token
 function getAuthToken(): string | null {
@@ -30,12 +52,27 @@ async function apiRequest<T>(
     headers,
   });
 
+  // Try to parse JSON if Content-Type indicates JSON; otherwise capture text for clearer errors
+  const contentType = response.headers.get('Content-Type') || '';
+  const isJson = contentType.includes('application/json');
+
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Request failed' }));
-    throw new Error(error.error || `HTTP ${response.status}`);
+    if (isJson) {
+      const error = await response.json().catch(() => ({ error: 'Request failed' }));
+      throw new Error(error.error || `HTTP ${response.status}`);
+    } else {
+      const text = await response.text().catch(() => 'Request failed');
+      throw new Error(text.slice(0, 300) || `HTTP ${response.status}`);
+    }
   }
 
-  return response.json();
+  if (isJson) {
+    return response.json();
+  } else {
+    // Non-JSON success response isn't expected; surface a helpful error
+    const text = await response.text();
+    throw new Error(`Expected JSON but received: ${text.slice(0, 300)}`);
+  }
 }
 
 // ============================================
@@ -159,6 +196,9 @@ export interface Listing {
     is_verified_agent: boolean;
     profile_picture_url: string | null;
   };
+  // Optional rating fields if backend exposes them
+  rating_average?: number;
+  rating_count?: number;
 }
 
 export interface ListingsResponse {
@@ -205,11 +245,13 @@ export const listingsAPI = {
       });
     }
     const query = params.toString() ? `?${params.toString()}` : '';
-    return apiRequest(`/api/listings.php${query}`);
+    const data = await apiRequest<ListingsResponse>(`/api/listings.php${query}`);
+    return normalizeListingsResponse(data);
   },
 
   getById: async (id: string): Promise<{ listing: Listing }> => {
-    return apiRequest(`/api/listings.php?id=${id}`);
+    const data = await apiRequest<{ listing: Listing }>(`/api/listings.php?id=${id}`);
+    return { listing: normalizeListing(data.listing) };
   },
 
   create: async (data: CreateListingData): Promise<{ listing: Listing }> => {
@@ -269,6 +311,18 @@ export const uploadAPI = {
 };
 
 // ============================================
+// IMAGES API (manage individual images)
+// ============================================
+
+export const imagesAPI = {
+  delete: async (id: string): Promise<{ message: string }> => {
+    return apiRequest(`/api/images.php?id=${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
+// ============================================
 // STORAGE HELPERS
 // ============================================
 
@@ -303,3 +357,64 @@ export const storage = {
     storage.removeUser();
   },
 };
+
+// ============================================
+// NORMALIZATION HELPERS
+// ============================================
+
+function normalizeImageUrl(url: string): string {
+  if (!url) return url;
+  try {
+    // Canonical path is /uploads
+    // Already an absolute URL to /uploads
+    if (/^https?:\/\//.test(url) && /\/uploads\//.test(url)) return url;
+
+    // If it's an absolute URL to /api/uploads/, rewrite to /uploads/
+    if (/^https?:\/\//.test(url) && /\/api\/uploads\//.test(url)) {
+      return url.replace(/\/api\/uploads\//, '/uploads/');
+    }
+
+    // If it starts with /api/uploads/, rewrite to /uploads/
+    if (/^\/api\/uploads\//.test(url)) {
+      return url.replace(/^\/api\/uploads\//, '/uploads/');
+    }
+
+    // If it already starts with /uploads/, keep
+    if (/^\/uploads\//.test(url)) return url;
+
+    // If it's a bare filename or 'uploads/filename', prefix with /uploads/
+    if (/^uploads\//.test(url)) {
+      return url.replace(/^uploads\//, '/uploads/');
+    }
+
+    // Bare filename (no slashes)
+    if (!/\/\//.test(url)) {
+      return `/uploads/${url}`;
+    }
+
+    // Fallback: return as-is
+    return url;
+  } catch {
+    // Safe fallback to /uploads
+  if (!/\/\//.test(url)) return `/uploads/${url}`;
+    return url.replace(/^\/api\/uploads\//, '/uploads/');
+  }
+}
+
+function normalizeListing(listing: Listing): Listing {
+  if (!listing) return listing as any;
+  if (Array.isArray(listing.images)) {
+    listing.images = listing.images.map(img => ({
+      ...img,
+      url: normalizeImageUrl(img.url),
+    }));
+  }
+  return listing;
+}
+
+function normalizeListingsResponse(res: ListingsResponse): ListingsResponse {
+  if (Array.isArray(res?.listings)) {
+    res.listings = res.listings.map(normalizeListing);
+  }
+  return res;
+}

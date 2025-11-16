@@ -12,7 +12,7 @@
  * @version 2.0.0 - Migrated from Supabase to PHP API
  */
 
-import { listingsAPI, uploadAPI, type Listing, type CreateListingData, type UpdateListingData, type ListingsFilters } from './apiClient';
+import { listingsAPI, uploadAPI, imagesAPI, type Listing, type CreateListingData, type UpdateListingData, type ListingsFilters } from './apiClient';
 import type { PropertyListing, AgentMetrics, PropertyImage } from '../types';
 import { UserRole } from '../types';
 import type { SearchFilters } from '../components/SearchBar';
@@ -58,6 +58,9 @@ const transformListing = (apiListing: Listing): PropertyListing => {
     updatedAt: apiListing.updated_at,
     views: apiListing.views,
     saves: apiListing.saves,
+    // Map optional rating summary if present
+    ratingAverage: typeof (apiListing as any).rating_average === 'number' ? (apiListing as any).rating_average : undefined,
+    ratingCount: typeof (apiListing as any).rating_count === 'number' ? (apiListing as any).rating_count : undefined,
   };
 };
 
@@ -199,6 +202,23 @@ export const uploadPropertyImage = async (file: File): Promise<string> => {
 };
 
 /**
+ * Deletes a single image by id from a listing
+ */
+export const deleteListingImage = async (imageId: string): Promise<void> => {
+  try {
+    await imagesAPI.delete(imageId);
+  } catch (error: any) {
+    // If endpoint not deployed yet (404) or image already gone, treat as non-fatal
+    if (error.message && /404/.test(error.message)) {
+      console.warn(`Image ${imageId} not found on server (404). Skipping.`);
+      return;
+    }
+    console.error(`Error deleting image ${imageId}:`, error);
+    throw new Error(error.message || 'Failed to delete image');
+  }
+};
+
+/**
  * Gets agent metrics and statistics
  * Note: This will need to be implemented on the backend if needed
  */
@@ -238,5 +258,6 @@ export const listingService = {
   updateListing,
   deleteListing,
   uploadPropertyImage,
+  deleteListingImage,
   getAgentMetrics,
 };

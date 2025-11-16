@@ -1,0 +1,60 @@
+# KejaLink SPA + API Routing (HostAfrica)
+# --------------------------------------
+# Place this in public_html/.htaccess
+# Ensures: /api/* and /uploads/* are NOT rewritten; all other routes serve index.html.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Map legacy /api/uploads/* to /uploads/* (internal rewrite, no redirect)
+  RewriteRule ^api/uploads/(.*)$ uploads/$1 [L]
+
+  # 1. Pass through existing files / directories
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # 2. Exclusions: API, uploads, phpmailer assets
+  RewriteCond %{REQUEST_URI} ^/(api|uploads|phpmailer)/ [NC]
+  RewriteRule ^ - [L]
+
+  # 3. SPA fallback (IMPORTANT: must be plain 'index.html' no markdown link!)
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Cache: let static assets cache long time; index.html no-cache is handled by JS build hash
+<FilesMatch "index\.html$">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+  </IfModule>
+</FilesMatch>
+
+# Compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript application/json
+</IfModule>
+
+# Optional asset expiry (commented out until stable asset naming)
+# <IfModule mod_expires.c>
+#   ExpiresActive On
+#   ExpiresByType image/jpg "access plus 1 year"
+#   ExpiresByType image/jpeg "access plus 1 year"
+#   ExpiresByType image/gif "access plus 1 year"
+#   ExpiresByType image/png "access plus 1 year"
+#   ExpiresByType image/svg+xml "access plus 1 year"
+#   ExpiresByType text/css "access plus 1 year"
+#   ExpiresByType application/javascript "access plus 1 year"
+# </IfModule>
+
+Options -Indexes
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
+php_value max_execution_time 300

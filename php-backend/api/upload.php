@@ -4,7 +4,12 @@
  * Handles file uploads for property images
  */
 
-require_once __DIR__ . '/../config.php';
+// Load local config if it exists, otherwise use production config
+if (file_exists(__DIR__ . '/../config.local.php')) {
+    require_once __DIR__ . '/../config.local.php';
+} else {
+    require_once __DIR__ . '/../config.php';
+}
 require_once __DIR__ . '/../auth.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -56,8 +61,8 @@ try {
     // Set proper permissions
     chmod($uploadPath, 0644);
     
-    // Generate public URL
-    $publicUrl = UPLOAD_URL . $uniqueFilename;
+    // Generate public URL based on configured UPLOAD_URL (now /uploads/ per config)
+    $publicUrl = rtrim(UPLOAD_URL, '/').'/'.$uniqueFilename;
     
     // If listing_id is provided, save to property_images table
     $imageId = null;

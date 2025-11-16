@@ -80,12 +80,14 @@ const AgentDashboardPage: React.FC = () => {
       let savedListing: PropertyListing;
       if (editingListing) {
         savedListing = await listingService.updateListing(editingListing.id, formData);
-        
-                // Handle image removal for existing listings
+        // Handle image removals explicitly via images API
         if (imagesToRemove && imagesToRemove.length > 0) {
-          console.log(`[Form Submit] Marked ${imagesToRemove.length} images for removal`);
-          // Note: With the new API, images are managed through the listings endpoint
-          // Image deletion will be handled by the backend when updating the listing
+          console.log(`[Form Submit] Removing ${imagesToRemove.length} image(s)`);
+          try {
+            await Promise.all(imagesToRemove.map((imgId) => listingService.deleteListingImage(imgId)));
+          } catch (e) {
+            console.error('Some images failed to delete:', e);
+          }
         }
       } else {
         // For new listings, we'll upload images separately after creating the listing

@@ -42,6 +42,7 @@ const ListingFormModal: React.FC<ListingFormModalProps> = ({ isOpen, onClose, on
   const [existingImages, setExistingImages] = useState<PropertyImage[]>([]);
   const [imagesToRemove, setImagesToRemove] = useState<string[]>([]);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [customAmenity, setCustomAmenity] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -228,7 +229,70 @@ const ListingFormModal: React.FC<ListingFormModalProps> = ({ isOpen, onClose, on
             <Input label="Bathrooms" name="bathrooms" type="number" min="0" value={formData.bathrooms ?? 1} onChange={handleChange} required />
           </div>
           <Input label="Area (sq ft, optional)" name="areaSqFt" type="number" min="0" value={formData.areaSqFt ?? 0} onChange={handleChange} />
-          <Textarea label="Amenities (comma-separated)" name="amenities-text" value={(formData.amenities ?? []).join(', ')} onChange={handleChange} placeholder="e.g. Parking, Balcony, Borehole" />
+          
+          {/* Amenities Section */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Amenities</label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
+              {['Parking', 'Balcony', 'Borehole', 'Swimming Pool', 'Gym', 'Security', 'Garden', 'WiFi', 'Generator', 'Elevator'].map(amenity => (
+                <label key={amenity} className="flex items-center space-x-2 text-sm">
+                  <input
+                    type="checkbox"
+                    name="amenities"
+                    value={amenity}
+                    checked={(formData.amenities ?? []).includes(amenity)}
+                    onChange={handleChange}
+                    className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                  />
+                  <span>{amenity}</span>
+                </label>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input 
+                label="Other Amenities (optional)" 
+                name="custom-amenities" 
+                placeholder="Type and press Enter to add" 
+                value={customAmenity}
+                onChange={(e) => setCustomAmenity(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const customValue = customAmenity.trim();
+                    if (customValue && !formData.amenities?.includes(customValue)) {
+                      setFormData(prev => ({
+                        ...prev,
+                        amenities: [...(prev.amenities ?? []), customValue]
+                      }));
+                      setCustomAmenity('');
+                    }
+                  }
+                }}
+                className="flex-1"
+              />
+            </div>
+            {formData.amenities && formData.amenities.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {formData.amenities.map((amenity, idx) => (
+                  <span key={idx} className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+                    {amenity}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          amenities: (prev.amenities ?? []).filter(a => a !== amenity)
+                        }));
+                      }}
+                      className="ml-2 text-green-600 hover:text-green-800"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Images</label>

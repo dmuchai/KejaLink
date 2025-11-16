@@ -54,8 +54,9 @@ define('APP_URL', 'https://yourdomain.com'); // CHANGE THIS to your domain
 // FILE UPLOAD CONFIGURATION
 // ============================================
 
+// Uploads: store in /uploads at web root for direct serving
 define('UPLOAD_DIR', __DIR__ . '/uploads/'); // Upload directory
-define('UPLOAD_URL', 'https://yourdomain.com/api/uploads/'); // CHANGE THIS - Public URL to uploads
+define('UPLOAD_URL', 'https://yourdomain.com/uploads/'); // CHANGE THIS - Public URL to uploads
 define('MAX_FILE_SIZE', 5 * 1024 * 1024); // 5MB
 define('ALLOWED_EXTENSIONS', ['jpg', 'jpeg', 'png', 'gif', 'webp']);
 

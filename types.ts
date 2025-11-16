@@ -19,6 +19,7 @@ export interface PropertyImage {
   id: string;
   url: string;
   altText?: string;
+  displayOrder?: number;  // Order of image display (not rendered in UI)
   aiScanStatus: 'pending' | 'clear' | 'flagged_reused' | 'flagged_poor_quality';
   aiScanReason?: string;
 }
@@ -47,6 +48,9 @@ export interface PropertyListing {
   updatedAt: string;
   views: number;
   saves: number;
+  // Optional rating summary fields (populated if backend provides)
+  ratingAverage?: number; // 0-5
+  ratingCount?: number;   // total number of reviews
 }
 
 export interface RatingReview {

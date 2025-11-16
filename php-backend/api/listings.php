@@ -4,7 +4,12 @@
  * Handles CRUD operations for property listings
  */
 
-require_once __DIR__ . '/../config.php';
+// Load local config if it exists, otherwise use production config
+if (file_exists(__DIR__ . '/../config.local.php')) {
+    require_once __DIR__ . '/../config.local.php';
+} else {
+    require_once __DIR__ . '/../config.php';
+}
 require_once __DIR__ . '/../auth.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -55,8 +60,7 @@ function getListings() {
                 (SELECT JSON_ARRAYAGG(
                     JSON_OBJECT(
                         'id', pi.id,
-                        'url', pi.url,
-                        'display_order', pi.display_order
+                        'url', pi.url
                     )
                 ) FROM property_images pi WHERE pi.listing_id = l.id ORDER BY pi.display_order) as images
             FROM property_listings l
