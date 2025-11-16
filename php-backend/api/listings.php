@@ -106,12 +106,14 @@ function getListings() {
         
         if (isset($_GET['location'])) {
             $sql .= " AND (
-                l.title LIKE ? OR 
-                l.description LIKE ? OR
-                JSON_UNQUOTE(JSON_EXTRACT(l.location, '$.address')) LIKE ? OR
-                JSON_UNQUOTE(JSON_EXTRACT(l.location, '$.city')) LIKE ?
+                LOWER(l.title) LIKE LOWER(?) OR 
+                LOWER(l.description) LIKE LOWER(?) OR
+                LOWER(JSON_UNQUOTE(JSON_EXTRACT(l.location, '$.address'))) LIKE LOWER(?) OR
+                LOWER(JSON_UNQUOTE(JSON_EXTRACT(l.location, '$.city'))) LIKE LOWER(?) OR
+                LOWER(JSON_UNQUOTE(JSON_EXTRACT(l.location, '$.area'))) LIKE LOWER(?)
             )";
             $searchTerm = '%' . $_GET['location'] . '%';
+            $params[] = $searchTerm;
             $params[] = $searchTerm;
             $params[] = $searchTerm;
             $params[] = $searchTerm;
