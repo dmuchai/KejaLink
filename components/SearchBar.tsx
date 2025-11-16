@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Button from './Button';
 import Input from './Input';
 import Select from './Select';
-import { MagnifyingGlassIcon, KenyanCounties } from '../constants';
+import { MagnifyingGlassIcon, KenyanCounties, PropertyTypes } from '../constants';
 
 interface SearchBarProps {
   onSearch: (filters: SearchFilters) => void;
@@ -13,6 +13,7 @@ interface SearchBarProps {
 export interface SearchFilters {
   location?: string;
   county?: string;
+  propertyType?: string;
   minPrice?: number;
   maxPrice?: number;
   bedrooms?: number;
@@ -32,6 +33,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialFilters = {}, is
   };
 
   const countyOptions = KenyanCounties.map(county => ({ value: county, label: county }));
+  const propertyTypeOptions = [
+    { value: '', label: 'Any Type' },
+    ...PropertyTypes.map(pt => ({ value: pt.value, label: pt.label }))
+  ];
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
@@ -42,7 +47,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialFilters = {}, is
           placeholder="e.g. Kilimani, 2 bedroom near Yaya"
           value={filters.location || ''}
           onChange={handleChange}
-          containerClassName="lg:col-span-2"
         />
         <Select
           label="County"
@@ -51,6 +55,13 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialFilters = {}, is
           value={filters.county || ''}
           onChange={handleChange}
           placeholder="Any County"
+        />
+        <Select
+          label="Property Type"
+          name="propertyType"
+          options={propertyTypeOptions}
+          value={filters.propertyType || ''}
+          onChange={handleChange}
         />
          <Input
           label="Bedrooms"

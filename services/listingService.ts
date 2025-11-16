@@ -74,6 +74,7 @@ export const getListings = async (filters?: SearchFilters): Promise<PropertyList
     if (filters) {
       if (filters.location) apiFilters.location = filters.location;
       if (filters.county) apiFilters.county = filters.county;
+      if (filters.propertyType) apiFilters.property_type = filters.propertyType;
       if (filters.bedrooms) apiFilters.bedrooms = filters.bedrooms;
       if (filters.minPrice) apiFilters.minPrice = filters.minPrice;
       if (filters.maxPrice) apiFilters.maxPrice = filters.maxPrice;

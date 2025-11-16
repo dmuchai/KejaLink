@@ -24,11 +24,14 @@ export interface PropertyImage {
   aiScanReason?: string;
 }
 
+export type PropertyType = 'apartment' | 'studio' | 'bedsitter' | 'bungalow' | 'maisonette' | 'townhouse';
+
 export interface PropertyListing {
   id:string;
   agent: User;
   title: string;
   description: string;
+  propertyType?: PropertyType;
   location: {
     address: string;
     county: string;

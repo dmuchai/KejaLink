@@ -76,6 +76,11 @@ function getListings() {
             $params[] = (int)$_GET['bedrooms'];
         }
         
+        if (isset($_GET['property_type'])) {
+            $sql .= " AND l.property_type = ?";
+            $params[] = $_GET['property_type'];
+        }
+        
         if (isset($_GET['county'])) {
             $sql .= " AND JSON_UNQUOTE(JSON_EXTRACT(l.location, '$.county')) = ?";
             $params[] = $_GET['county'];

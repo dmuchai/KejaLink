@@ -224,6 +224,7 @@ export interface UpdateListingData extends Partial<CreateListingData> {}
 
 export interface ListingsFilters {
   bedrooms?: number;
+  property_type?: string;
   county?: string;
   minPrice?: number;
   maxPrice?: number;

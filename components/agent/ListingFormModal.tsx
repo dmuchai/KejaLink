@@ -7,7 +7,7 @@ import Input from '../Input';
 import Textarea from '../Textarea';
 import Select from '../Select';
 import Alert from '../Alert';
-import { SparklesIcon, KenyanCounties } from '../../constants';
+import { SparklesIcon, KenyanCounties, PropertyTypes } from '../../constants';
 
 interface ListingFormModalProps {
   isOpen: boolean;
@@ -223,6 +223,17 @@ const ListingFormModal: React.FC<ListingFormModalProps> = ({ isOpen, onClose, on
             <Select label="County" name="location.county" options={countyOptions} value={formData.location.county ?? 'Nairobi'} onChange={handleChange} required />
             <Input label="Neighborhood" name="location.neighborhood" value={formData.location.neighborhood ?? ''} onChange={handleChange} required />
           </div>
+          <Select 
+            label="Property Type" 
+            name="propertyType" 
+            options={[
+              { value: '', label: 'Select Property Type' },
+              ...PropertyTypes.map(pt => ({ value: pt.value, label: pt.label }))
+            ]} 
+            value={formData.propertyType ?? ''} 
+            onChange={handleChange} 
+            required 
+          />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Input label="Price (KES per month)" name="price" type="number" value={formData.price ?? 0} onChange={handleChange} required />
             <Input label="Bedrooms" name="bedrooms" type="number" min="0" value={formData.bedrooms ?? 1} onChange={handleChange} required />

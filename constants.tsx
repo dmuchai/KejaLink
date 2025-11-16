@@ -90,3 +90,12 @@ export const KenyanCounties = [
   "Samburu", "Siaya", "Taita Taveta", "Tana River", "Tharaka Nithi",
   "Trans Nzoia", "Turkana", "Uasin Gishu", "Vihiga", "Wajir", "West Pokot"
 ];
+
+export const PropertyTypes = [
+  { value: 'apartment', label: 'Apartment' },
+  { value: 'studio', label: 'Studio' },
+  { value: 'bedsitter', label: 'Bedsitter' },
+  { value: 'bungalow', label: 'Bungalow' },
+  { value: 'maisonette', label: 'Maisonette' },
+  { value: 'townhouse', label: 'Townhouse' },
+] as const;
