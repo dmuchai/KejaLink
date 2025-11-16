@@ -5,12 +5,21 @@ import { useAuth } from '../hooks/useAuth';
 
 const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProductsOpenMobile, setIsProductsOpenMobile] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const handleListProperty = () => {
+    if (user && user.role === 'agent') {
+      navigate('/dashboard/agent');
+    } else {
+      navigate('/auth?mode=register&role=agent&returnTo=/dashboard/agent');
+    }
   };
 
   // Build navigation links dynamically: hide Agent Dashboard until an agent is logged in
@@ -41,6 +50,61 @@ const Navbar: React.FC = () => {
                 {link.name}
               </Link>
             ))}
+            {/* Products dropdown */}
+            <div className="relative group">
+              <button className="flex items-center gap-1 text-gray-700 hover:text-green-600 transition-colors" aria-haspopup="menu" aria-expanded="false">
+                <span>Products</span>
+                <svg
+                  className="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+              <div className="absolute left-0 mt-2 w-72 bg-white rounded-md shadow-lg py-2 hidden group-hover:block">
+                <a
+                  href="https://moving-planner-ke.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50"
+                >
+                  Movelink — Professional Movers
+                </a>
+                <a
+                  href="https://property-manager-ke.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50"
+                >
+                  KejaLink Property Management System
+                </a>
+              </div>
+            </div>
+            <button
+              onClick={handleListProperty}
+              className="px-3 py-2 border border-green-600 text-green-700 rounded-md hover:bg-green-50 transition-colors flex items-center gap-2"
+              aria-label="List a Property"
+            >
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              <span>List a Property</span>
+            </button>
             {user ? (
               <div className="relative group">
                 <button className="flex items-center text-gray-700 hover:text-green-600">
@@ -91,6 +155,70 @@ const Navbar: React.FC = () => {
                 {link.name}
               </Link>
             ))}
+            {/* Products collapsible */}
+            <button
+              onClick={() => setIsProductsOpenMobile((v) => !v)}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-600 hover:bg-green-50"
+              aria-expanded={isProductsOpenMobile}
+              aria-controls="mobile-products-menu"
+            >
+              <span>Products</span>
+              <svg
+                className={`w-4 h-4 transition-transform ${isProductsOpenMobile ? 'rotate-180' : ''}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+            {isProductsOpenMobile && (
+              <div id="mobile-products-menu" className="ml-3 space-y-1">
+                <a
+                  href="https://moving-planner-ke.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => { setIsMobileMenuOpen(false); setIsProductsOpenMobile(false); }}
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-600 hover:bg-green-50"
+                >
+                  Movelink — Professional Movers
+                </a>
+                <a
+                  href="https://property-manager-ke.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => { setIsMobileMenuOpen(false); setIsProductsOpenMobile(false); }}
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-600 hover:bg-green-50"
+                >
+                  KejaLink Property Management System
+                </a>
+              </div>
+            )}
+            <button
+              onClick={() => { handleListProperty(); setIsMobileMenuOpen(false); }}
+              className="block w-full text-left px-3 py-2 rounded-md text-base font-medium border border-green-600 text-green-700 bg-white hover:bg-green-50"
+              aria-label="List a Property"
+            >
+              <span className="inline-flex items-center gap-2">
+                <svg
+                  className="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+                List a Property
+              </span>
+            </button>
             {user ? (
               <>
                 {user.role === 'agent' && (
