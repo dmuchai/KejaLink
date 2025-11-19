@@ -95,9 +95,9 @@ const ListingDetailPage: React.FC = () => {
     setIsLoadingEstimate(true);
     try {
       const estimateData = await geminiService.estimateRent(
-        listing.location.neighborhood,
+        listing.location.neighborhood || listing.location.address,
         listing.bedrooms,
-        listing.location.county
+        'Nairobi' // Default to Nairobi since we're focusing on Nairobi region
       );
       if (estimateData) {
         setRentEstimate({
@@ -165,7 +165,7 @@ const ListingDetailPage: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-800 mb-2">{listing.title}</h1>
         <div className="flex items-center text-gray-600 mb-4">
           <MapPinIcon className="w-5 h-5 mr-2" />
-          <span>{listing.location.address}, {listing.location.neighborhood}, {listing.location.county}</span>
+          <span>{listing.location.neighborhood ? `${listing.location.address}, ${listing.location.neighborhood}` : listing.location.address}</span>
         </div>
         
         <div className="flex items-center justify-between mb-6">
@@ -208,7 +208,9 @@ const ListingDetailPage: React.FC = () => {
           <h2 className="text-xl font-semibold text-gray-800 mb-3">Location</h2>
           <div className="mb-3">
             <p className="text-gray-700">{listing.location.address}</p>
-            <p className="text-gray-600 text-sm">{listing.location.neighborhood}, {listing.location.county}</p>
+            {listing.location.neighborhood && (
+              <p className="text-gray-600 text-sm">{listing.location.neighborhood}</p>
+            )}
           </div>
           <SinglePropertyMap 
             location={listing.location}

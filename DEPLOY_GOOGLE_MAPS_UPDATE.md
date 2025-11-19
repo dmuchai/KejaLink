@@ -226,7 +226,7 @@ See `FIX_PRODUCTION_COORDINATES.md` for detailed instructions.
 1. Open browser console (F12) → Check for errors
 2. Look for "Google Maps" or "API key" errors
 3. Verify API key in source: View Page Source → Search for "maps.googleapis.com"
-4. Check API key is correct: `AIzaSyD8CaQ3HnH78QhB55qWjD8hPbpdeHVvh10`
+4. Check API key is present and valid in the script tag
 
 **Solution**:
 - API key might be invalid or quota exceeded

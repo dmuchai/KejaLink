@@ -41,7 +41,7 @@ switch ($method) {
 
 /**
  * Get all listings with filters
- * GET /api/listings.php?bedrooms=2&county=Nairobi&minPrice=50000&maxPrice=100000
+ * GET /api/listings.php?bedrooms=2&minPrice=50000&maxPrice=100000&location=Kilimani
  */
 function getListings() {
     try {
@@ -79,11 +79,6 @@ function getListings() {
         if (isset($_GET['property_type'])) {
             $sql .= " AND l.property_type = ?";
             $params[] = $_GET['property_type'];
-        }
-        
-        if (isset($_GET['county'])) {
-            $sql .= " AND JSON_UNQUOTE(JSON_EXTRACT(l.location, '$.county')) = ?";
-            $params[] = $_GET['county'];
         }
         
         if (isset($_GET['minPrice'])) {

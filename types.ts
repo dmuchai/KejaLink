@@ -34,7 +34,6 @@ export interface PropertyListing {
   propertyType?: PropertyType;
   location: {
     address: string;
-    county: string;
     neighborhood: string;
     latitude?: number;
     longitude?: number;

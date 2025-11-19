@@ -28,8 +28,18 @@ export const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const isSelectingPlace = useRef(false);
+  const selectedValue = useRef<string>('');
+  const onChangeRef = useRef(onChange);
+  const onPlaceSelectRef = useRef(onPlaceSelect);
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+
+  // Keep refs up to date
+  useEffect(() => {
+    onChangeRef.current = onChange;
+    onPlaceSelectRef.current = onPlaceSelect;
+  }, [onChange, onPlaceSelect]);
 
   useEffect(() => {
     // Check if Google Maps API is loaded
@@ -65,6 +75,9 @@ export const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = ({
           return;
         }
 
+        // Set flag to prevent onChange from interfering
+        isSelectingPlace.current = true;
+
         // Extract address components
         let city = '';
         let county = '';
@@ -97,13 +110,29 @@ export const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = ({
 
         console.log('Place selected:', selectedPlace);
 
-        // Update the input value
-        onChange(selectedPlace.address);
-
-        // Notify parent component
-        if (onPlaceSelect) {
-          onPlaceSelect(selectedPlace);
+        // Store the selected value FIRST
+        selectedValue.current = selectedPlace.address;
+        
+        // Set flag to prevent onChange handler from overriding
+        isSelectingPlace.current = true;
+        
+        // Update the input field directly
+        if (inputRef.current) {
+          inputRef.current.value = selectedPlace.address;
         }
+        
+        // Update parent's state with the selected address
+        onChangeRef.current(selectedPlace.address);
+        
+        // Notify parent component with full place data (coordinates, etc.)
+        if (onPlaceSelectRef.current) {
+          onPlaceSelectRef.current(selectedPlace);
+        }
+
+        // Reset flag after both callbacks complete
+        setTimeout(() => {
+          isSelectingPlace.current = false;
+        }, 1000); // Increased to 1 second
       });
 
       autocompleteRef.current = autocomplete;
@@ -117,15 +146,52 @@ export const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = ({
         google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
     };
-  }, [isLoaded, onPlaceSelect, onChange, value]);
+  }, [isLoaded]); // Only re-run when Google Maps loads, not on every value change
+
+  // Update input value when prop changes (e.g., when editing a listing)
+  useEffect(() => {
+    if (inputRef.current && value && !isSelectingPlace.current) {
+      inputRef.current.value = value;
+    }
+  }, [value]);
 
   return (
     <div>
       <Input
         ref={inputRef}
         label={label}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        defaultValue={value}
+        onChange={(e) => {
+          const inputValue = e.target.value;
+          console.log('Input onChange fired. isSelectingPlace:', isSelectingPlace.current, 'selectedValue:', selectedValue.current, 'inputValue:', inputValue);
+          
+          // FIRST: Block if Google Places is currently selecting
+          if (isSelectingPlace.current) {
+            console.log('onChange blocked - Google Places is selecting');
+            return;
+          }
+          
+          // SECOND: If we have a selected value from Google, protect it
+          if (selectedValue.current) {
+            // If input value matches selected value, ignore the onChange
+            if (inputValue === selectedValue.current) {
+              console.log('onChange blocked - value matches selected place');
+              return;
+            }
+            // If user is deleting characters (input shorter than selected), they're editing - clear selected value
+            if (inputValue.length < selectedValue.current.length) {
+              console.log('User is editing selected value - clearing selection');
+              selectedValue.current = '';
+            } else {
+              // Input is longer but doesn't match - user typed after selecting, ignore it
+              console.log('onChange blocked - preserving selected value');
+              return;
+            }
+          }
+          
+          // If we get here, it's a normal user typing - update parent
+          onChange(inputValue);
+        }}
         placeholder={placeholder}
         required={required}
         disabled={disabled}

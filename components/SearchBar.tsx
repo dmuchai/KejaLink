@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Button from './Button';
 import Input from './Input';
 import Select from './Select';
-import { MagnifyingGlassIcon, KenyanCounties, PropertyTypes } from '../constants';
+import { MagnifyingGlassIcon, PropertyTypes } from '../constants';
 
 interface SearchBarProps {
   onSearch: (filters: SearchFilters) => void;
@@ -12,7 +12,6 @@ interface SearchBarProps {
 
 export interface SearchFilters {
   location?: string;
-  county?: string;
   propertyType?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -32,7 +31,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialFilters = {}, is
     onSearch(filters);
   };
 
-  const countyOptions = KenyanCounties.map(county => ({ value: county, label: county }));
   const propertyTypeOptions = [
     { value: '', label: 'Any Type' },
     ...PropertyTypes.map(pt => ({ value: pt.value, label: pt.label }))
@@ -40,21 +38,13 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialFilters = {}, is
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
         <Input
           label="Location/Keyword"
           name="location"
-          placeholder="e.g. Kilimani, 2 bedroom near Yaya"
+          placeholder="e.g. Kilimani, Westlands"
           value={filters.location || ''}
           onChange={handleChange}
-        />
-        <Select
-          label="County"
-          name="county"
-          options={countyOptions}
-          value={filters.county || ''}
-          onChange={handleChange}
-          placeholder="Any County"
         />
         <Select
           label="Property Type"

@@ -177,7 +177,7 @@ const AgentDashboardPage: React.FC = () => {
                 <img src={getPrimaryImage(listing.images)} alt="Listing" className="w-24 h-20 object-cover rounded" />
                 <div className="flex-grow">
                   <h3 className="text-lg font-medium">{listing.title}</h3>
-                  <p className="text-sm text-gray-600">{listing.location.county}</p>
+                  <p className="text-sm text-gray-600">{listing.location.neighborhood || listing.location.address}</p>
                   <p className="text-sm text-gray-600">KES {listing.price.toLocaleString()}</p>
                   <div className="flex gap-2 mt-2">
                     <Button size="sm" onClick={() => handleEditListing(listing)}>Edit</Button>

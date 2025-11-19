@@ -75,7 +75,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
         </Link>
         <div className="flex items-center text-sm text-gray-500 mt-1">
           <MapPinIcon className="w-4 h-4 mr-1 text-green-500" />
-          <span>{listing.location?.neighborhood}, {listing.location?.county}</span>
+          <span>{listing.location?.neighborhood || listing.location?.address}</span>
         </div>
 
         <p className="text-xl font-bold text-green-600 my-2">{formatPrice(listing.price)}/mo</p>

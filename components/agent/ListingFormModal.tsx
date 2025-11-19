@@ -26,7 +26,7 @@ const ListingFormModal: React.FC<ListingFormModalProps> = ({ isOpen, onClose, on
   const [formData, setFormData] = useState<Omit<PropertyListing, 'id' | 'createdAt' | 'updatedAt' | 'views' | 'saves' | 'agent'>>({
     title: '',
     description: '',
-    location: { address: '', county: 'Nairobi', neighborhood: '' },
+    location: { address: '', neighborhood: '' },
     price: 0,
     bedrooms: 1,
     bathrooms: 1,
@@ -53,7 +53,6 @@ const ListingFormModal: React.FC<ListingFormModalProps> = ({ isOpen, onClose, on
           ...editableData,
           location: {
             address: editableData.location?.address ?? '',
-            county: editableData.location?.county ?? 'Nairobi',
             neighborhood: editableData.location?.neighborhood ?? '',
           },
           areaSqFt: editableData.areaSqFt ?? 0,
@@ -66,7 +65,7 @@ const ListingFormModal: React.FC<ListingFormModalProps> = ({ isOpen, onClose, on
         setFormData({
           title: '',
           description: '',
-          location: { address: '', county: 'Nairobi', neighborhood: '' },
+          location: { address: '', neighborhood: '' },
           price: 0,
           bedrooms: 1,
           bathrooms: 1,
@@ -148,6 +147,23 @@ const ListingFormModal: React.FC<ListingFormModalProps> = ({ isOpen, onClose, on
     setFormError('');
     const { images, ...restOfData } = formData;
 
+    // Debug: Log the location data being submitted
+    console.log('Submitting listing with location:', restOfData.location);
+    
+    // Warn if no coordinates (user didn't select from Google Places)
+    if (!restOfData.location.latitude || !restOfData.location.longitude) {
+      const confirmSubmit = window.confirm(
+        'Warning: You did not select an address from the Google Places dropdown. ' +
+        'The listing will not appear on the map without coordinates. ' +
+        '\n\nDo you want to continue anyway?'
+      );
+      if (!confirmSubmit) {
+        setIsSubmitting(false);
+        setFormError('Please select an address from the Google Places dropdown to add map coordinates.');
+        return;
+      }
+    }
+
     try {
       await onSubmit(restOfData, imageFiles, imagesToRemove);
       onClose();
@@ -196,8 +212,6 @@ const ListingFormModal: React.FC<ListingFormModalProps> = ({ isOpen, onClose, on
 
   if (!isOpen) return null;
 
-  const countyOptions = KenyanCounties.map(c => ({ value: c, label: c }));
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -220,28 +234,40 @@ const ListingFormModal: React.FC<ListingFormModalProps> = ({ isOpen, onClose, on
             </Button>
           </div>
           <PlacesAutocomplete
-            label="Address (Street, Building)"
+            label="Location (Address)"
             value={formData.location.address ?? ''}
-            onChange={(value) => setFormData(prev => ({ ...prev, location: { ...prev.location, address: value } }))}
-            onPlaceSelect={(place) => {
-              setFormData(prev => ({
-                ...prev,
-                location: {
-                  address: place.address,
-                  county: place.county || prev.location.county,
-                  neighborhood: place.city || prev.location.neighborhood,
-                  latitude: place.latitude,
-                  longitude: place.longitude,
-                },
+            onChange={(value) => {
+              // Only update if it's a manual typing (not from Google selection)
+              console.log('onChange called with value:', value);
+              setFormData(prev => ({ 
+                ...prev, 
+                location: { 
+                  ...prev.location, 
+                  address: value 
+                } 
               }));
+            }}
+            onPlaceSelect={(place) => {
+              console.log('Place selected in form:', place.address);
+              console.log('Full place data:', place);
+              setFormData(prev => {
+                const updated = {
+                  ...prev,
+                  location: {
+                    ...prev.location,
+                    address: place.address,
+                    neighborhood: place.city || prev.location.neighborhood,
+                    latitude: place.latitude,
+                    longitude: place.longitude,
+                  },
+                };
+                console.log('Updated formData.location:', updated.location);
+                return updated;
+              });
             }}
             placeholder="Start typing an address in Kenya..."
             required
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Select label="County" name="location.county" options={countyOptions} value={formData.location.county ?? 'Nairobi'} onChange={handleChange} required />
-            <Input label="Neighborhood" name="location.neighborhood" value={formData.location.neighborhood ?? ''} onChange={handleChange} required />
-          </div>
           <Select 
             label="Property Type" 
             name="propertyType" 

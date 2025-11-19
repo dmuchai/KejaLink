@@ -63,7 +63,7 @@ export const geminiService = {
 
       Details:
       Title: ${listing.title || 'N/A'}
-      Location: ${listing.location?.neighborhood}, ${listing.location?.county}
+      Location: ${listing.location?.neighborhood || listing.location?.address}
       Price: KES ${listing.price}
       Bedrooms: ${listing.bedrooms}
       Bathrooms: ${listing.bathrooms}

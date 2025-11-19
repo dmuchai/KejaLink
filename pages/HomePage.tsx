@@ -42,7 +42,7 @@ const HomePage: React.FC = () => {
   return (
     <div className="space-y-12">
       {/* Hero Section */}
-      <section className="relative bg-gray-900 text-white py-16 md:py-24 rounded-lg shadow-xl overflow-hidden">
+      <section className="relative bg-gray-900 text-  white py-16 md:py-24 rounded-lg shadow-xl overflow-hidden">
         <div className="absolute inset-0">
           <img src="/images/nairobi-skyline-hero.png" alt="Nairobi skyline with modern residential buildings" className="w-full h-full object-cover opacity-40"/>
         </div>

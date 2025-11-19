@@ -158,7 +158,6 @@ export const authAPI = {
 // ============================================
 
 export interface Location {
-  county: string;
   area: string;
   neighborhood?: string;
   address?: string;
@@ -228,7 +227,6 @@ export interface UpdateListingData extends Partial<CreateListingData> {}
 export interface ListingsFilters {
   bedrooms?: number;
   property_type?: string;
-  county?: string;
   minPrice?: number;
   maxPrice?: number;
   status?: string;

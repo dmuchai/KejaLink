@@ -8,7 +8,6 @@ import Alert from '../components/Alert';
 import PropertyMap from '../components/PropertyMap';
 import { PropertyListing } from '../types';
 import { listingService } from '../services/listingService';
-import { KenyanCounties } from '../constants'; // For filter options
 import Select from '../components/Select';
 import Input from '../components/Input';
 import Button from '../components/Button';
@@ -27,7 +26,6 @@ const ListingsPage: React.FC = () => {
   const initialFiltersFromState = (locationHook.state as { initialSearchFilters?: SearchFilters })?.initialSearchFilters || {};
   const initialFiltersFromURL: SearchFilters = {
     location: searchParams.get('location') || undefined,
-    county: searchParams.get('county') || undefined,
     minPrice: searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined,
     maxPrice: searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined,
     bedrooms: searchParams.get('bedrooms') ? Number(searchParams.get('bedrooms')) : undefined,
@@ -83,7 +81,6 @@ const ListingsPage: React.FC = () => {
     }));
   };
 
-  const countyOptions = KenyanCounties.map(county => ({ value: county, label: county }));
   const bedroomOptions = [1,2,3,4,5].map(n => ({value: n, label: `${n} Bedroom${n > 1 ? 's' : ''}`}));
 
   return (
@@ -97,15 +94,7 @@ const ListingsPage: React.FC = () => {
             </Button>
         </div>
         {showAdvancedFilters && (
-            <div className="mt-4 p-4 border border-gray-200 rounded-md bg-gray-50 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                <Select
-                    label="County"
-                    name="county"
-                    options={countyOptions}
-                    value={currentFilters.county || ''}
-                    onChange={handleAdvancedFilterChange}
-                    placeholder="Any County"
-                />
+            <div className="mt-4 p-4 border border-gray-200 rounded-md bg-gray-50 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Select
                     label="Bedrooms"
                     name="bedrooms"

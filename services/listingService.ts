@@ -28,7 +28,6 @@ const transformListing = (apiListing: Listing): PropertyListing => {
     propertyType: apiListing.property_type,
     price: parseFloat(apiListing.price.toString()),
     location: {
-      county: apiListing.location.county,
       neighborhood: apiListing.location.area || apiListing.location.neighborhood,
       address: apiListing.location.address || '',
       latitude: apiListing.location.latitude,
@@ -76,7 +75,6 @@ export const getListings = async (filters?: SearchFilters): Promise<PropertyList
 
     if (filters) {
       if (filters.location) apiFilters.location = filters.location;
-      if (filters.county) apiFilters.county = filters.county;
       if (filters.propertyType) apiFilters.property_type = filters.propertyType;
       if (filters.bedrooms) apiFilters.bedrooms = filters.bedrooms;
       if (filters.minPrice) apiFilters.minPrice = filters.minPrice;
@@ -126,7 +124,6 @@ export const createListing = async (
       property_type: listingData.propertyType || 'apartment',
       price: listingData.price,
       location: {
-        county: listingData.location.county,
         area: listingData.location.neighborhood,
         address: listingData.location.address,
         latitude: listingData.location.latitude,
@@ -164,7 +161,6 @@ export const updateListing = async (
     if (updates.price !== undefined) updateData.price = updates.price;
     if (updates.location) {
       updateData.location = {
-        county: updates.location.county,
         area: updates.location.neighborhood,
         address: updates.location.address,
         latitude: updates.location.latitude,

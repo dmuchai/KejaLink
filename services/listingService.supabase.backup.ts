@@ -276,12 +276,6 @@ const getListings = async (filters?: SearchFilters & { agentId?: string }) => {
     query = query.eq('bedrooms', filters.bedrooms);
   }
 
-  // Filter by county using JSON containment
-  if (filters?.county) {
-    // Query the location JSON field for county
-    query = query.contains('location', { county: filters.county });
-  }
-
   // Text search across multiple fields
   if (filters?.location) {
     // Search in title, description, and location fields
