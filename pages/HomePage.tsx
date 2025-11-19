@@ -42,13 +42,13 @@ const HomePage: React.FC = () => {
   return (
     <div className="space-y-12">
       {/* Hero Section */}
-      <section className="relative bg-gray-900 text-  white py-16 md:py-24 rounded-lg shadow-xl overflow-hidden">
+      <section className="relative bg-gray-900 text-white py-16 md:py-24 rounded-lg shadow-xl overflow-hidden">
         <div className="absolute inset-0">
           <img src="/images/nairobi-skyline-hero.png" alt="Nairobi skyline with modern residential buildings" className="w-full h-full object-cover opacity-40"/>
         </div>
         <div className="container mx-auto px-4 text-center relative z-10">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Find Your Next Home in Kenya</h1>
-          <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">Find Your Next Home in Kenya</h1>
+          <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto text-white">
             Discover verified rental listings from trusted agents and landlords. Say goodbye to scams and hello to your dream home.
           </p>
           <div className="max-w-3xl mx-auto">
